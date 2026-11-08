@@ -1,0 +1,11 @@
+{
+  "name": "dreammosaic",
+  "version": "1.0.0",
+  "description": "DreamMosaic — Private Photo Mosaic PWA for Two",
+  "main": "server.js",
+  "scripts": {"start": "node server.js", "test": "node tests/test_backend.js"},
+  "keywords": ["mosaic", "photo-mosaic", "cielab", "pwa", "private", "security-keys", "scrypt"],
+  "author": "DreamMosaic Studio",
+  "license": "MIT",
+  "engines": {"node": ">=18.0.0"}
+}
