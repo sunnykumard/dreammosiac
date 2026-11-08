@@ -1,2 +1,9 @@
 [build]
   publish = "public"
+
+# Route frontend API requests through Netlify to the Render backend.
+[[redirects]]
+  from = "/api/*"
+  to = "https://dreammosaic-api.onrender.com/api/:splat"
+  status = 200
+  force = true
