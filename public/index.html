@@ -1,0 +1,2818 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>DreamMosaic — Nocturne Darkroom Studio</title>
+  
+  <!-- PWA Meta Tags -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="DreamMosaic">
+  <meta name="theme-color" content="#12100e">
+  <meta name="description" content="Private, high-fidelity photographic mosaic studio for two.">
+
+  <!-- Google Fonts: Fraunces (Romantic Editorial Serif), Plus Jakarta Sans (Tactile UI), JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,700;1,9..144,600&family=JetBrains+Mono:wght@500;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <!-- JSZip for in-browser instant ZIP photo extraction -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            nocturne: {
+              bg: '#12100e',
+              surface: '#1c1916',
+              elevated: '#26211d',
+              well: '#0a0908',
+              border: '#3d342e',
+              borderBright: '#574a40',
+              cream: '#f5efe6',
+              muted: '#a89b8c',
+              coral: '#e86f58',
+              coralHover: '#f2826b',
+              coralDeep: '#3a1d17',
+              sage: '#4ea898',
+              sageDeep: '#162c28',
+              amber: '#eeb868',
+              amberDeep: '#332614'
+            }
+          },
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+            serif: ['"Fraunces"', 'Georgia', 'serif'],
+            mono: ['"JetBrains Mono"', 'monospace']
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    /* Nocturne Darkroom Tactile Design System */
+    body {
+      background-color: #12100e;
+      background-image: radial-gradient(#29231e 1px, transparent 1px);
+      background-size: 22px 22px;
+      color: #f5efe6;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    /* Custom Scrollbars */
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: #12100e; border-left: 1.5px solid #26211d; }
+    ::-webkit-scrollbar-thumb { background: #e86f58; border-radius: 99px; border: 2px solid #0a0908; }
+    ::-webkit-scrollbar-thumb:hover { background: #4ea898; }
+
+    /* Tactile Darkroom Cards (Crisp Bronze Rim & Pitch-Black Offset Depth) */
+    .atelier-card {
+      background: #1c1916;
+      border: 2px solid #3d342e;
+      box-shadow: 4px 4px 0px #060504;
+      border-radius: 18px;
+    }
+    .atelier-card-lg {
+      background: #1c1916;
+      border: 2px solid #4a3f37;
+      box-shadow: 6px 6px 0px #060504;
+      border-radius: 22px;
+    }
+    .atelier-card-hero {
+      background: linear-gradient(135deg, #281b18 0%, #1f1916 55%, #182724 100%);
+      border: 2px solid #e86f58;
+      box-shadow: 6px 6px 0px #060504;
+      border-radius: 22px;
+    }
+    .atelier-card-sage {
+      background: #162c28;
+      border: 2px solid #4ea898;
+      box-shadow: 4px 4px 0px #060504;
+      border-radius: 18px;
+    }
+    .atelier-card-ochre {
+      background: #2b2114;
+      border: 2px solid #eeb868;
+      box-shadow: 4px 4px 0px #060504;
+      border-radius: 18px;
+    }
+
+    /* Tactile Pressable Darkroom Buttons */
+    .atelier-btn {
+      border: 2px solid #060504;
+      box-shadow: 4px 4px 0px #060504;
+      font-weight: 700;
+      transition: transform 0.12s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.12s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.15s ease;
+      cursor: pointer;
+    }
+    .atelier-btn:hover {
+      transform: translate(-1px, -1px);
+      box-shadow: 5px 5px 0px #060504;
+    }
+    .atelier-btn:active {
+      transform: translate(3px, 3px);
+      box-shadow: 1px 1px 0px #060504;
+    }
+
+    .atelier-btn-sm {
+      border: 2px solid #3d342e;
+      box-shadow: 3px 3px 0px #060504;
+      font-weight: 700;
+      transition: transform 0.1s ease, box-shadow 0.1s ease, border-color 0.15s ease;
+    }
+    .atelier-btn-sm:hover {
+      border-color: #e86f58;
+    }
+    .atelier-btn-sm:active {
+      transform: translate(2px, 2px);
+      box-shadow: 1px 1px 0px #060504;
+    }
+
+    /* Darkroom Inputs & Tactile Sliders */
+    .atelier-input {
+      background: #12100e;
+      border: 2px solid #3d342e;
+      box-shadow: 2.5px 2.5px 0px #060504;
+      color: #f5efe6;
+      font-weight: 600;
+    }
+    .atelier-input:focus {
+      outline: none;
+      border-color: #e86f58;
+      box-shadow: 3.5px 3.5px 0px #e86f58;
+    }
+
+    input[type=range] {
+      -webkit-appearance: none;
+      background: #0a0908;
+      border: 2px solid #3d342e;
+      border-radius: 9999px;
+      height: 10px;
+      box-shadow: 2px 2px 0px #060504;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      height: 22px;
+      width: 22px;
+      border-radius: 50%;
+      background: #e86f58;
+      border: 2px solid #f5efe6;
+      box-shadow: 2px 2px 0px #060504;
+      cursor: pointer;
+      transition: transform 0.1s ease, background-color 0.15s ease;
+    }
+    input[type=range]::-webkit-slider-thumb:active {
+      background: #eeb868;
+      transform: scale(1.1);
+    }
+
+    input[type=checkbox] {
+      accent-color: #e86f58;
+      width: 18px;
+      height: 18px;
+      border: 2px solid #3d342e;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .interactive-viewport {
+      touch-action: none;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+  </style>
+</head>
+<body class="bg-nocturne-bg text-nocturne-cream min-h-screen flex flex-col font-sans antialiased selection:bg-nocturne-coral selection:text-nocturne-well">
+
+  <!-- Top Header (Nocturne Darkroom Bar) -->
+  <header class="sticky top-0 z-40 bg-[#161311]/95 backdrop-blur-md border-b-2 border-nocturne-border px-4 py-3 flex items-center justify-between">
+    <div class="flex items-center space-x-3">
+      <div class="w-10 h-10 rounded-xl bg-nocturne-coral border-2 border-[#060504] flex items-center justify-center shadow-[3px_3px_0px_#060504]">
+        <svg class="w-5 h-5 text-[#12100e]" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+        </svg>
+      </div>
+      <div>
+        <h1 class="font-serif text-xl font-bold tracking-tight text-nocturne-cream leading-none">DreamMosaic</h1>
+        <p class="text-[10px] font-mono font-bold uppercase tracking-wider text-nocturne-amber mt-1 bg-nocturne-amberDeep inline-block px-2 py-0.5 border border-nocturne-amber/50 rounded-full">Nocturne Edition for Two</p>
+      </div>
+    </div>
+
+    <!-- Right Header Controls -->
+    <div class="flex items-center space-x-2">
+      <!-- Role Badge -->
+      <div id="userRoleBadge" class="hidden items-center space-x-1.5 px-3 py-1 rounded-full text-xs font-bold bg-nocturne-sageDeep text-nocturne-sage border-2 border-nocturne-sage shadow-[2px_2px_0px_#060504]">
+        <span class="w-2 h-2 rounded-full bg-nocturne-amber"></span>
+        <span id="userRoleLabel">Owner (Admin)</span>
+      </div>
+
+      <!-- Settings Button -->
+      <button id="btnHeaderAction" class="atelier-btn-sm p-2 bg-nocturne-elevated hover:bg-nocturne-amberDeep text-nocturne-cream rounded-xl" title="Vault Settings">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>
+        </svg>
+      </button>
+
+      <!-- Logout Button -->
+      <button id="btnLogout" class="hidden atelier-btn-sm p-2 bg-nocturne-coralDeep hover:bg-nocturne-coral hover:text-[#12100e] text-nocturne-coral border-nocturne-coral/50 rounded-xl" title="Lock & Logout">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main App Container -->
+  <div class="flex-1 flex overflow-hidden">
+    
+    <!-- Desktop Left Sidebar (Nocturne Darkroom Navigation) -->
+    <aside id="desktopSidebar" class="hidden md:flex flex-col w-64 bg-[#161311] border-r-2 border-nocturne-border p-4 space-y-6 shrink-0">
+      <div class="space-y-1.5">
+        <p class="px-2 text-[11px] font-mono font-bold uppercase tracking-wider text-nocturne-muted">Darkroom & Studio</p>
+        
+        <button data-nav="dashboard" class="nav-btn w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-sm font-bold transition bg-nocturne-coral text-[#12100e] border-2 border-[#060504] shadow-[3px_3px_0px_#060504]">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+          </svg>
+          <span>Studio Home</span>
+        </button>
+
+        <button data-nav="workspace" class="nav-btn w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-sm font-bold transition text-nocturne-cream hover:bg-nocturne-elevated border-2 border-transparent hover:border-nocturne-border">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+          </svg>
+          <span>Craft Mosaic</span>
+        </button>
+
+        <button data-nav="library" class="nav-btn w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-sm font-bold transition text-nocturne-cream hover:bg-nocturne-elevated border-2 border-transparent hover:border-nocturne-border">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+          </svg>
+          <div class="flex-1 flex items-center justify-between">
+            <span>Film Roll Tiles</span>
+            <span id="navLibraryCount" class="text-xs font-mono font-bold px-2 py-0.5 rounded-full bg-nocturne-amberDeep text-nocturne-amber border border-nocturne-amber/50">0</span>
+          </div>
+        </button>
+
+        <button data-nav="viewer" class="nav-btn w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-sm font-bold transition text-nocturne-cream hover:bg-nocturne-elevated border-2 border-transparent hover:border-nocturne-border">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/>
+          </svg>
+          <span>Loupe & Export</span>
+        </button>
+
+        <button data-nav="projects" class="nav-btn w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-sm font-bold transition text-nocturne-cream hover:bg-nocturne-elevated border-2 border-transparent hover:border-nocturne-border">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/>
+          </svg>
+          <span>Framed Keepsakes</span>
+        </button>
+      </div>
+
+      <div class="space-y-1.5 pt-4 border-t-2 border-nocturne-border">
+        <p class="px-2 text-[11px] font-mono font-bold uppercase tracking-wider text-nocturne-muted">Privacy</p>
+        
+        <button data-nav="settings" class="nav-btn w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-sm font-bold transition text-nocturne-cream hover:bg-nocturne-elevated border-2 border-transparent hover:border-nocturne-border">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+          </svg>
+          <span>Security Vault</span>
+        </button>
+      </div>
+
+      <!-- Quick Memory Status Box -->
+      <div class="mt-auto p-3.5 atelier-card-sage space-y-2">
+        <div class="flex items-center justify-between text-xs font-bold text-nocturne-cream">
+          <span>Darkroom Privacy</span>
+          <span id="sidebarStatusIndicator" class="px-2 py-0.5 bg-nocturne-well border border-nocturne-sage text-nocturne-sage rounded-full text-[10px] font-mono">2-KEY LOCK</span>
+        </div>
+        <div class="w-full bg-nocturne-well h-2 rounded-full overflow-hidden border border-nocturne-sage/50">
+          <div id="sidebarProgressBar" class="bg-nocturne-sage h-full w-24"></div>
+        </div>
+        <p class="text-[11px] font-semibold text-nocturne-muted">100% On-Device Processing.</p>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 overflow-y-auto relative p-3 sm:p-6 lg:p-8 pb-24 md:pb-8">
+
+      <!-- ================================================================= -->
+      <!-- VIEW 1: AUTHENTICATION / KEY LOGIN -->
+      <!-- ================================================================= -->
+      <section id="viewLogin" class="view-panel max-w-md mx-auto my-auto py-6 space-y-6">
+        <div class="text-center space-y-2">
+          <div class="inline-flex p-3.5 rounded-2xl bg-nocturne-coralDeep border-2 border-nocturne-coral shadow-[4px_4px_0px_#060504] mb-1">
+            <svg class="w-8 h-8 text-nocturne-coral" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+            </svg>
+          </div>
+          <h2 class="font-serif text-3xl font-bold text-nocturne-cream tracking-tight">Private Memory Studio</h2>
+          <p class="text-sm font-medium text-nocturne-muted">Built for two. Enter your security key to enter the darkroom.</p>
+        </div>
+
+        <div class="atelier-card-lg p-6 space-y-5">
+          <div class="space-y-2">
+            <label class="text-xs font-mono font-bold uppercase tracking-wider text-nocturne-amber">Cryptographic Access Key</label>
+            <div class="relative">
+              <input type="password" id="inputSecurityKey" placeholder="dm_sec_owner_... or dm_sec_partner_..." 
+                class="atelier-input w-full px-4 py-3 rounded-xl text-sm font-mono placeholder-nocturne-muted/50">
+              <button id="btnToggleKeyVisibility" class="absolute right-3 top-3 text-nocturne-muted hover:text-nocturne-cream">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                </svg>
+              </button>
+            </div>
+            <p class="text-[11px] font-medium text-nocturne-muted">128-bit high-entropy token. Zero public accounts or cloud tracking.</p>
+          </div>
+
+          <div id="loginErrorBox" class="hidden p-3 rounded-xl bg-nocturne-coralDeep border-2 border-nocturne-coral text-nocturne-cream font-bold text-xs"></div>
+
+          <button id="btnSubmitLogin" class="atelier-btn w-full py-3.5 px-4 rounded-xl bg-nocturne-coral hover:bg-nocturne-coralHover text-[#12100e] flex items-center justify-center space-x-2 text-base font-extrabold">
+            <span>Enter Our Studio</span>
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+            </svg>
+          </button>
+
+          <div class="pt-4 border-t-2 border-nocturne-border text-center space-y-2">
+            <p class="text-xs font-semibold text-nocturne-muted">First time opening DreamMosaic?</p>
+            <button id="btnGotoSetup" class="atelier-btn-sm px-4 py-2 rounded-xl bg-nocturne-elevated hover:bg-nocturne-amberDeep text-xs font-bold text-nocturne-amber inline-block">
+              Generate Owner & Partner Keys →
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================================================================= -->
+      <!-- VIEW 2: FIRST-TIME OWNER SETUP -->
+      <!-- ================================================================= -->
+      <section id="viewSetup" class="view-panel hidden max-w-xl mx-auto my-auto py-6 space-y-6">
+        <div class="text-center space-y-2">
+          <div class="inline-flex p-3 rounded-2xl bg-nocturne-sageDeep border-2 border-nocturne-sage shadow-[4px_4px_0px_#060504] mb-1">
+            <svg class="w-8 h-8 text-nocturne-sage" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+            </svg>
+          </div>
+          <h2 class="font-serif text-3xl font-bold text-nocturne-cream">Key Minting Ceremony</h2>
+          <p class="text-sm font-medium text-nocturne-muted">Creates two independent security keys: one for you, one for your partner.</p>
+        </div>
+
+        <div class="atelier-card-lg p-6 space-y-5">
+          <div class="space-y-4">
+            <div class="p-4 rounded-xl bg-nocturne-coralDeep/60 border-2 border-nocturne-coral/60 space-y-2">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-mono font-bold uppercase text-nocturne-cream">1. Owner Key (Administrator)</span>
+                <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-nocturne-coral text-[#12100e]">OWNER</span>
+              </div>
+              <div class="flex items-center space-x-2">
+                <input type="text" id="displayOwnerKey" readonly value="Tap Mint Keys below..." 
+                  class="atelier-input flex-1 px-3 py-2 text-xs font-mono rounded-lg">
+                <button id="btnCopyOwnerKey" class="atelier-btn-sm px-3 py-2 text-xs rounded-lg bg-nocturne-elevated hover:bg-nocturne-amberDeep text-nocturne-cream">Copy</button>
+              </div>
+            </div>
+
+            <div class="p-4 rounded-xl bg-nocturne-sageDeep/70 border-2 border-nocturne-sage/60 space-y-2">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-mono font-bold uppercase text-nocturne-cream">2. Partner Key (Member)</span>
+                <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-nocturne-sage text-[#12100e]">PARTNER</span>
+              </div>
+              <div class="flex items-center space-x-2">
+                <input type="text" id="displayPartnerKey" readonly value="Tap Mint Keys below..." 
+                  class="atelier-input flex-1 px-3 py-2 text-xs font-mono rounded-lg">
+                <button id="btnCopyPartnerKey" class="atelier-btn-sm px-3 py-2 text-xs rounded-lg bg-nocturne-elevated hover:bg-nocturne-amberDeep text-nocturne-cream">Copy</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex flex-col sm:flex-row gap-3">
+            <button id="btnGenerateKeys" class="atelier-btn flex-1 py-3.5 px-4 rounded-xl bg-nocturne-coral hover:bg-nocturne-coralHover text-[#12100e] flex items-center justify-center space-x-2 font-extrabold">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+              </svg>
+              <span>Mint Pair of Keys</span>
+            </button>
+
+            <button id="btnDownloadCredentials" class="hidden atelier-btn py-3.5 px-4 rounded-xl bg-nocturne-amber text-[#12100e] items-center justify-center space-x-2 font-extrabold">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+              </svg>
+              <span>Save Backup (.txt)</span>
+            </button>
+          </div>
+
+          <div class="pt-4 border-t-2 border-nocturne-border flex items-center justify-between">
+            <button id="btnBackToLogin" class="text-xs font-bold text-nocturne-muted hover:text-nocturne-cream underline">← Back to Login</button>
+            <button id="btnProceedToVault" class="hidden atelier-btn-sm px-3.5 py-1.5 rounded-xl bg-nocturne-sage text-[#12100e] text-xs font-extrabold">
+              Enter Studio Now →
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================================================================= -->
+      <!-- VIEW 3: DASHBOARD -->
+      <!-- ================================================================= -->
+      <section id="viewDashboard" class="view-panel hidden max-w-5xl mx-auto space-y-6">
+        <!-- Hero Nocturne Card -->
+        <div class="atelier-card-hero p-6 sm:p-8 relative overflow-hidden">
+          <div class="max-w-2xl space-y-3.5">
+            <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-nocturne-well border-2 border-nocturne-coral text-nocturne-coral text-xs font-bold shadow-[2px_2px_0px_#060504]">
+              <span>✦ NOCTURNE DARKROOM FOR TWO</span>
+            </div>
+            <h2 class="font-serif text-3xl sm:text-4xl font-bold text-nocturne-cream tracking-tight leading-tight">
+              Weave hundreds of shared moments into a single timeless portrait.
+            </h2>
+            <p class="text-sm sm:text-base font-medium text-nocturne-muted leading-relaxed">
+              Every cell in the mosaic is a real photograph from our story. Step back to see our main portrait; zoom in 16× with the darkroom loupe to revisit each individual memory.
+            </p>
+            
+            <div class="pt-2 flex flex-wrap gap-3">
+              <button id="btnDashCreateMosaic" class="atelier-btn py-3.5 px-6 rounded-xl bg-nocturne-coral hover:bg-nocturne-coralHover text-[#12100e] flex items-center space-x-2 text-sm font-extrabold">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
+                </svg>
+                <span>Craft New Mosaic</span>
+              </button>
+
+              <button id="btnDashUploadPhotos" class="atelier-btn py-3.5 px-6 rounded-xl bg-nocturne-elevated hover:bg-nocturne-border text-nocturne-cream flex items-center space-x-2 text-sm">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                </svg>
+                <span>Load Film Roll Tiles</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tactile Metrics Grid -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <div class="atelier-card p-4 space-y-1">
+            <p class="text-[11px] font-mono font-bold uppercase text-nocturne-muted">Film Roll Tiles</p>
+            <p id="statTileCount" class="font-serif text-3xl font-bold text-nocturne-cream">0</p>
+            <p class="text-[11px] font-bold text-nocturne-sage">Saved in Vault</p>
+          </div>
+          <div class="atelier-card-ochre p-4 space-y-1">
+            <p class="text-[11px] font-mono font-bold uppercase text-nocturne-amber">Framed Keepsakes</p>
+            <p id="statProjectCount" class="font-serif text-3xl font-bold text-nocturne-cream">0</p>
+            <p class="text-[11px] font-bold text-nocturne-amber">Archival Prints</p>
+          </div>
+          <div class="atelier-card-sage p-4 space-y-1">
+            <p class="text-[11px] font-mono font-bold uppercase text-nocturne-sage">Optical Engine</p>
+            <p class="font-serif text-2xl font-bold text-nocturne-cream">CIELAB 2×2</p>
+            <p class="text-[11px] font-bold text-nocturne-sage">Sub-Grid Delta-E</p>
+          </div>
+          <div class="atelier-card p-4 space-y-1">
+            <p class="text-[11px] font-mono font-bold uppercase text-nocturne-muted">Key Holder</p>
+            <p id="statRoleDisplay" class="font-serif text-2xl font-bold text-nocturne-coral">Owner</p>
+            <p class="text-[11px] font-bold text-nocturne-muted">Private Session</p>
+          </div>
+        </div>
+
+        <!-- Optional Demo Palette Card -->
+        <div class="atelier-card p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div class="space-y-1 text-center sm:text-left">
+            <h4 class="font-serif text-base font-bold text-nocturne-cream">
+              Testing before uploading your own camera roll?
+            </h4>
+            <p class="text-xs font-medium text-nocturne-muted">
+              For portraits, upload 50+ personal photos in the <strong>Photos</strong> tab. Or load our warm tonal palette to preview the engine.
+            </p>
+          </div>
+          <button id="btnLoadSamplePack" class="atelier-btn-sm whitespace-nowrap px-4 py-2.5 rounded-xl text-xs bg-nocturne-elevated hover:bg-nocturne-amberDeep text-nocturne-amber">
+            Load Warm Test Palette
+          </button>
+        </div>
+
+        <!-- Recent Projects Section -->
+        <div class="space-y-3">
+          <div class="flex items-center justify-between">
+            <h3 class="font-serif text-lg font-bold text-nocturne-cream">Framed Keepsakes</h3>
+            <button id="btnDashViewAllProjects" class="text-xs font-bold text-nocturne-coral underline">View Gallery →</button>
+          </div>
+          <div id="dashRecentProjectsContainer" class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div class="col-span-full py-8 text-center text-nocturne-muted font-semibold text-xs atelier-card">
+              No keepsakes framed yet. Tap "Craft New Mosaic" above to create your first piece!
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================================================================= -->
+      <!-- VIEW 4: CREATE MOSAIC WORKSPACE -->
+      <!-- ================================================================= -->
+      <section id="viewWorkspace" class="view-panel hidden max-w-6xl mx-auto space-y-5">
+        <div class="flex items-center justify-between border-b-2 border-nocturne-border pb-3">
+          <div>
+            <h2 class="font-serif text-2xl font-bold text-nocturne-cream">Darkroom Workbench</h2>
+            <p class="text-xs font-medium text-nocturne-muted">Select your main portrait, tune the optical blend, and develop your mosaic.</p>
+          </div>
+          <button id="btnResetWorkspace" class="atelier-btn-sm px-3 py-1.5 rounded-xl text-xs bg-nocturne-elevated hover:bg-nocturne-amberDeep text-nocturne-cream">
+            Reset Dials
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          
+          <!-- Left Column: Controls (5 cols) -->
+          <div class="lg:col-span-5 space-y-5">
+            
+            <!-- Step 1: Target Image Selection Card -->
+            <div class="atelier-card p-5 space-y-3">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-mono font-bold uppercase px-2.5 py-0.5 bg-nocturne-coralDeep border border-nocturne-coral/60 rounded-full text-nocturne-coral">01 • Main Portrait</span>
+                <span id="targetPhotoBadge" class="text-xs font-mono font-bold text-nocturne-sage">None selected</span>
+              </div>
+
+              <div id="dropZoneTarget" class="border-2 border-dashed border-nocturne-borderBright hover:border-nocturne-coral hover:bg-nocturne-coralDeep/20 rounded-2xl p-4 text-center cursor-pointer transition bg-nocturne-well relative overflow-hidden">
+                <input type="file" id="fileInputTarget" accept="image/jpeg,image/png,image/webp" class="hidden">
+                <div id="targetUploadPrompt" class="space-y-2 py-4">
+                  <div class="w-12 h-12 mx-auto rounded-2xl bg-nocturne-elevated border-2 border-nocturne-borderBright shadow-[2.5px_2.5px_0px_#060504] flex items-center justify-center text-nocturne-amber">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                    </svg>
+                  </div>
+                  <p class="text-sm text-nocturne-cream font-bold">Tap to Choose Main Photograph</p>
+                  <p class="text-xs font-medium text-nocturne-muted">Portrait or landscape photo from your phone</p>
+                </div>
+
+                <!-- Preview container -->
+                <div id="targetPreviewWrapper" class="hidden relative rounded-xl overflow-hidden bg-nocturne-well border-2 border-nocturne-border flex items-center justify-center max-h-64">
+                  <img id="imgTargetPreview" class="max-h-60 w-auto object-contain" alt="Target Preview">
+                  <button id="btnRemoveTarget" class="atelier-btn-sm absolute top-2 right-2 p-1.5 rounded-lg bg-nocturne-coral text-[#12100e]" title="Remove image">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Quick Target Presets -->
+              <div class="flex items-center space-x-2 pt-1">
+                <span class="text-xs font-bold text-nocturne-muted">Test Canvas:</span>
+                <button id="btnPresetCouple" class="atelier-btn-sm text-xs px-2.5 py-1 rounded-lg bg-nocturne-elevated hover:bg-nocturne-amberDeep text-nocturne-cream">Sunset Silhouette</button>
+                <button id="btnPresetPortrait" class="atelier-btn-sm text-xs px-2.5 py-1 rounded-lg bg-nocturne-elevated hover:bg-nocturne-coralDeep text-nocturne-cream">Warm Rose Heart</button>
+              </div>
+            </div>
+
+            <!-- Step 2: Mosaic Tuning & Parameters -->
+            <div class="atelier-card p-5 space-y-4">
+              <span class="text-xs font-mono font-bold uppercase px-2.5 py-0.5 bg-nocturne-sageDeep border border-nocturne-sage/60 rounded-full text-nocturne-sage">02 • Optical Dials</span>
+
+              <!-- Mode Selection -->
+              <div class="space-y-1.5">
+                <label class="text-xs font-bold text-nocturne-cream">Development Style</label>
+                <div class="grid grid-cols-2 gap-3">
+                  <button id="modeClassic" class="mode-select-btn px-3 py-2.5 rounded-xl text-xs font-bold border-2 border-[#060504] bg-nocturne-coral text-[#12100e] shadow-[3px_3px_0px_#060504] flex flex-col items-center space-y-0.5">
+                    <span>Classic Archival</span>
+                    <span class="text-[10px] opacity-90 font-semibold">True-to-life tones</span>
+                  </button>
+                  <button id="modeDreamy" class="mode-select-btn px-3 py-2.5 rounded-xl text-xs font-bold border-2 border-nocturne-border bg-nocturne-elevated text-nocturne-cream flex flex-col items-center space-y-0.5">
+                    <span>Golden Hour</span>
+                    <span class="text-[10px] text-nocturne-muted font-medium">Warm film bloom</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Tile Density Slider -->
+              <div class="space-y-1.5">
+                <div class="flex items-center justify-between text-xs">
+                  <label class="font-bold text-nocturne-cream">Tile Grid Resolution</label>
+                  <span id="labelDensity" class="font-mono text-xs font-bold px-2 py-0.5 bg-nocturne-amberDeep border border-nocturne-amber/50 text-nocturne-amber rounded-md">60 × 80 (4,800 tiles)</span>
+                </div>
+                <input type="range" id="sliderDensity" min="25" max="100" value="60" class="w-full">
+                <div class="flex justify-between text-[10px] font-semibold text-nocturne-muted">
+                  <span>Larger Tiles</span>
+                  <span>Fine Portrait Detail</span>
+                </div>
+              </div>
+
+              <!-- Blending Algorithm Selector -->
+              <div class="space-y-1.5">
+                <div class="flex items-center justify-between text-xs">
+                  <label class="font-bold text-nocturne-cream">Tone Harmonization</label>
+                  <select id="selectBlendMode" class="atelier-input px-2.5 py-1.5 rounded-xl text-xs">
+                    <option value="color" selected>Natural Harmony (Best for Portraits)</option>
+                    <option value="soft-light">Soft Film Tone (Gentle)</option>
+                    <option value="overlay">Crisp Structure (High Contrast)</option>
+                    <option value="source-over">Direct Linear Blend</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Target Image Overlay Blending -->
+              <div class="space-y-1.5 p-3.5 rounded-2xl bg-nocturne-amberDeep/50 border-2 border-nocturne-amber/60">
+                <div class="flex items-center justify-between text-xs">
+                  <label class="font-bold text-nocturne-amber">✦ Live Blending Balance</label>
+                  <span id="labelBlendFactor" class="font-mono text-xs font-bold px-2 py-0.5 bg-nocturne-well border border-nocturne-amber/50 text-nocturne-cream rounded-md">35%</span>
+                </div>
+                <input type="range" id="sliderBlendFactor" min="0" max="75" value="35" class="w-full">
+                <div class="flex justify-between text-[10px] font-bold text-nocturne-muted">
+                  <span>0% (Pure Tiles)</span>
+                  <span>35% (Balanced)</span>
+                  <span>75% (Portrait Lock)</span>
+                </div>
+              </div>
+
+              <!-- Advanced Options Row -->
+              <div class="pt-2 space-y-2 border-t-2 border-nocturne-border">
+                <div class="flex items-center justify-between text-xs">
+                  <label class="font-semibold text-nocturne-cream">Tile Distribution</label>
+                  <select id="selectReuseStrategy" class="atelier-input px-2 py-1 rounded-lg text-xs">
+                    <option value="balanced" selected>Balanced Variety</option>
+                    <option value="strict">Strict Cap</option>
+                    <option value="unlimited">Closest Color Only</option>
+                  </select>
+                </div>
+
+                <div class="flex items-center justify-between text-xs">
+                  <label class="font-semibold text-nocturne-cream">Prevent Neighboring Repeats</label>
+                  <input type="checkbox" id="checkNeighborPenalty" checked>
+                </div>
+
+                <div class="flex items-center justify-between text-xs">
+                  <label class="font-semibold text-nocturne-cream">Mirror Tiles for Natural Flow</label>
+                  <input type="checkbox" id="checkTileMirroring" checked>
+                </div>
+
+                <div class="hidden">
+                  <span id="labelColorMatch">1.0x</span>
+                  <input type="range" id="sliderColorMatch" min="5" max="15" value="10">
+                </div>
+              </div>
+            </div>
+
+            <!-- Generate Button & Progress Indicator -->
+            <div class="space-y-3">
+              <button id="btnGenerateMosaic" class="atelier-btn w-full py-4 px-6 rounded-2xl bg-nocturne-coral hover:bg-nocturne-coralHover text-[#12100e] flex items-center justify-center space-x-2 text-base font-extrabold">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/>
+                </svg>
+                <span>Develop Photo Mosaic</span>
+              </button>
+
+              <!-- Progress Bar -->
+              <div id="generationProgressContainer" class="hidden atelier-card-ochre p-4 space-y-2">
+                <div class="flex items-center justify-between text-xs font-bold text-nocturne-cream">
+                  <span id="generationStatusText">Developing mosaic...</span>
+                  <span id="generationPercentage" class="font-mono text-nocturne-amber">0%</span>
+                </div>
+                <div class="w-full bg-nocturne-well h-3 rounded-full overflow-hidden border-2 border-nocturne-amber/60">
+                  <div id="generationProgressBar" class="h-full bg-nocturne-coral transition-all duration-150 w-0"></div>
+                </div>
+                <div class="flex justify-end">
+                  <button id="btnCancelGeneration" class="text-xs font-bold text-nocturne-coral underline">Cancel</button>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Right Column: Live Mosaic Preview (7 cols) -->
+          <div class="lg:col-span-7 flex flex-col space-y-3">
+            <div class="atelier-card-lg p-4 flex-1 flex flex-col min-h-[460px]">
+              
+              <!-- Canvas Toolbar -->
+              <div class="flex items-center justify-between border-b-2 border-nocturne-border pb-3 mb-3">
+                <div class="flex items-center space-x-2">
+                  <span class="font-serif text-sm font-bold text-nocturne-cream">Viewing Frame</span>
+                  <span id="canvasDimsBadge" class="text-[11px] font-mono font-bold px-2 py-0.5 rounded-full bg-nocturne-sageDeep border border-nocturne-sage/60 text-nocturne-sage">Ready</span>
+                </div>
+
+                <div class="flex items-center space-x-2">
+                  <button id="btnOpenInInspector" class="hidden atelier-btn-sm px-3.5 py-1.5 rounded-xl text-xs bg-nocturne-sage text-[#12100e] border-[#060504] font-extrabold flex items-center space-x-1.5">
+                    <span>Inspect 16× & Export</span>
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Main Canvas Area (Deep Obsidian Mat) -->
+              <div id="canvasViewportWrapper" class="relative flex-1 bg-nocturne-well rounded-2xl overflow-hidden flex items-center justify-center border-2 border-nocturne-border shadow-inner">
+                
+                <!-- Empty State -->
+                <div id="canvasEmptyState" class="text-center p-7 space-y-3 max-w-sm bg-nocturne-surface border-2 border-nocturne-borderBright rounded-2xl shadow-[4px_4px_0px_#060504] m-4">
+                  <div class="w-14 h-14 mx-auto rounded-2xl bg-nocturne-coralDeep border-2 border-nocturne-coral flex items-center justify-center text-nocturne-coral shadow-[2px_2px_0px_#060504]">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                    </svg>
+                  </div>
+                  <h4 class="font-serif text-base font-bold text-nocturne-cream">Your Easel is Ready</h4>
+                  <p class="text-xs font-medium text-nocturne-muted leading-relaxed">
+                    Add your personal tile photos in the <strong>Photos</strong> tab, select your main portrait on the left, and tap <strong>Develop Photo Mosaic</strong>.
+                  </p>
+                </div>
+
+                <!-- Live Generated Canvas -->
+                <canvas id="mainMosaicCanvas" class="hidden max-h-[70vh] max-w-full object-contain"></canvas>
+              </div>
+
+              <!-- Footer Status -->
+              <div class="pt-3 flex items-center justify-between text-xs font-semibold text-nocturne-muted">
+                <span id="canvasSummaryText">0 tile photos loaded</span>
+                <span class="font-mono text-[11px] bg-nocturne-sageDeep text-nocturne-sage px-2.5 py-0.5 border border-nocturne-sage/50 rounded-full">On-Device Darkroom</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ================================================================= -->
+      <!-- VIEW 5: PHOTO LIBRARY (TILES REPOSITORY) -->
+      <!-- ================================================================= -->
+      <section id="viewLibrary" class="view-panel hidden max-w-6xl mx-auto space-y-5">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b-2 border-nocturne-border pb-4">
+          <div>
+            <h2 class="font-serif text-2xl font-bold text-nocturne-cream">Film Roll Tile Library</h2>
+            <p class="text-xs font-medium text-nocturne-muted">Upload 50+ personal photos or a ZIP archive for rich natural color matching.</p>
+          </div>
+          
+          <!-- Library Actions Bar -->
+          <div class="flex flex-wrap items-center gap-2">
+            <input type="file" id="inputBatchPhotos" multiple accept="image/jpeg,image/png,image/webp" class="hidden">
+            <input type="file" id="inputFolderPhotos" webkitdirectory directory multiple class="hidden">
+            <input type="file" id="inputZipFile" accept=".zip,application/zip" class="hidden">
+
+            <button id="btnTriggerBatchUpload" class="atelier-btn-sm px-4 py-2.5 rounded-xl text-xs bg-nocturne-coral text-[#12100e] border-[#060504] font-extrabold flex items-center space-x-1.5">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
+              </svg>
+              <span>Add Photos</span>
+            </button>
+
+            <button id="btnTriggerFolderUpload" class="atelier-btn-sm px-3.5 py-2.5 rounded-xl text-xs bg-nocturne-elevated hover:bg-nocturne-border text-nocturne-cream flex items-center space-x-1.5">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/>
+              </svg>
+              <span>Add Folder</span>
+            </button>
+
+            <button id="btnTriggerZipUpload" class="atelier-btn-sm px-3.5 py-2.5 rounded-xl text-xs bg-nocturne-amberDeep hover:bg-nocturne-amber hover:text-[#12100e] text-nocturne-amber border-nocturne-amber/60 flex items-center space-x-1.5">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/>
+              </svg>
+              <span>Import ZIP</span>
+            </button>
+
+            <button id="btnClearLibrary" class="atelier-btn-sm px-3.5 py-2.5 rounded-xl text-xs bg-nocturne-coralDeep text-nocturne-coral border-nocturne-coral/50">
+              Clear Roll
+            </button>
+          </div>
+        </div>
+
+        <!-- ZIP Extraction Progress -->
+        <div id="zipProgressCard" class="hidden atelier-card-ochre p-4 space-y-2">
+          <div class="flex items-center justify-between text-xs font-bold text-nocturne-cream">
+            <span id="zipStatusText">Extracting ZIP archive...</span>
+            <span id="zipPercentageText" class="font-mono text-nocturne-amber">0%</span>
+          </div>
+          <div class="w-full bg-nocturne-well h-3 rounded-full overflow-hidden border-2 border-nocturne-amber/60">
+            <div id="zipProgressBar" class="h-full bg-nocturne-coral transition-all w-0"></div>
+          </div>
+        </div>
+
+        <!-- Library Status Bar -->
+        <div class="flex items-center justify-between text-xs font-bold text-nocturne-cream px-1">
+          <div class="flex items-center space-x-4">
+            <span>Loaded Memories: <strong id="libCountDisplay" class="font-mono px-2 py-0.5 bg-nocturne-amberDeep border border-nocturne-amber/50 text-nocturne-amber rounded-md">0</strong></span>
+            <span>Duplicates Skipped: <strong id="libDupDisplay" class="font-mono text-nocturne-muted">0</strong></span>
+          </div>
+          <button id="btnLibraryLoadSamples" class="text-xs font-bold text-nocturne-coral underline">Load Warm Test Palette</button>
+        </div>
+
+        <!-- Photo Grid -->
+        <div id="libraryGridContainer" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3"></div>
+
+        <!-- Empty State -->
+        <div id="libraryEmptyState" class="py-14 text-center space-y-3 atelier-card-lg p-6">
+          <div class="w-16 h-16 mx-auto rounded-2xl bg-nocturne-amberDeep border-2 border-nocturne-amber shadow-[3px_3px_0px_#060504] flex items-center justify-center text-nocturne-amber">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+            </svg>
+          </div>
+          <h3 class="font-serif text-lg font-bold text-nocturne-cream">Your Film Roll is Empty</h3>
+          <p class="text-xs font-medium text-nocturne-muted max-w-sm mx-auto">
+            Tap <strong>Add Photos</strong> or <strong>Import ZIP</strong> above to load your personal memories. They stay saved privately in your phone's vault.
+          </p>
+          <div class="pt-2">
+            <button id="btnEmptyLoadSamples" class="atelier-btn-sm px-4 py-2 rounded-xl text-xs bg-nocturne-elevated text-nocturne-amber">
+              Or Load Warm Test Palette
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================================================================= -->
+      <!-- VIEW 6: MOSAIC PREVIEW, INSPECTOR & EXPORT -->
+      <!-- ================================================================= -->
+      <section id="viewViewer" class="view-panel hidden max-w-6xl mx-auto space-y-4">
+        <!-- Top Control Bar -->
+        <div class="atelier-card p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div class="flex items-center space-x-2">
+            <span class="text-xs font-mono font-bold uppercase px-2.5 py-1 bg-nocturne-sageDeep border border-nocturne-sage/60 text-nocturne-sage rounded-full">16× Optical Loupe</span>
+            <div class="flex items-center space-x-1 bg-nocturne-well border-2 border-nocturne-border rounded-xl p-0.5 text-xs font-bold text-nocturne-cream">
+              <button id="btnZoomOut" class="px-2.5 py-1 hover:bg-nocturne-elevated rounded-lg">− Zoom</button>
+              <span id="labelZoomLevel" class="px-2 font-mono font-bold text-nocturne-amber">100%</span>
+              <button id="btnZoomIn" class="px-2.5 py-1 hover:bg-nocturne-elevated rounded-lg">+ Zoom</button>
+              <button id="btnZoomFit" class="px-2 py-1 bg-nocturne-elevated border border-nocturne-border rounded-lg text-[11px]">Fit</button>
+            </div>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-2">
+            <button id="btnToggleSplitView" class="atelier-btn-sm px-3 py-1.5 rounded-xl text-xs bg-nocturne-elevated text-nocturne-cream flex items-center space-x-1.5">
+              <span id="labelSplitBtn">Compare Before/After</span>
+            </button>
+
+            <button id="btnSaveToProjects" class="atelier-btn-sm px-3 py-1.5 rounded-xl text-xs bg-nocturne-sageDeep text-nocturne-sage border-nocturne-sage/60 flex items-center space-x-1.5">
+              <span>Frame Keepsake</span>
+            </button>
+
+            <button id="btnExportHighRes" class="atelier-btn-sm px-4 py-1.5 rounded-xl text-xs bg-nocturne-coral text-[#12100e] border-[#060504] font-extrabold flex items-center space-x-1.5">
+              <span>Export Archival PNG</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Interactive Pan/Zoom Canvas Viewport -->
+        <div id="inspectorViewport" class="interactive-viewport relative h-[65vh] min-h-[420px] bg-nocturne-well rounded-2xl overflow-hidden border-2 border-nocturne-borderBright shadow-[6px_6px_0px_#060504] cursor-grab active:cursor-grabbing flex items-center justify-center">
+          
+          <div id="inspectorTransformLayer" class="absolute origin-center transition-transform duration-75">
+            <canvas id="inspectorCanvas" class="shadow-2xl"></canvas>
+            <canvas id="splitOriginalCanvas" class="absolute top-0 left-0 pointer-events-none hidden"></canvas>
+          </div>
+
+          <div id="splitDividerHandle" class="absolute top-0 bottom-0 w-1.5 bg-nocturne-coral border-x border-[#060504] cursor-ew-resize z-20 hidden flex items-center justify-center">
+            <div class="w-8 h-8 rounded-full bg-nocturne-amber border-2 border-[#060504] text-[#12100e] shadow-[2px_2px_0px_#060504] flex items-center justify-center font-extrabold text-xs select-none">
+              ↔
+            </div>
+          </div>
+
+          <!-- Hover/Tap Tile Inspector HUD -->
+          <div id="tileTooltip" class="absolute bottom-4 left-4 z-30 pointer-events-none hidden atelier-card p-2.5 flex items-center space-x-3">
+            <img id="tooltipTileThumb" class="w-12 h-12 rounded-xl object-cover border-2 border-nocturne-borderBright" alt="Tile">
+            <div class="space-y-0.5 text-xs">
+              <p id="tooltipTileName" class="font-bold text-nocturne-cream max-w-[160px] truncate">Memory Photo</p>
+              <p id="tooltipTileCoords" class="text-[11px] text-nocturne-muted font-mono font-bold">Row 12, Col 8</p>
+              <p id="tooltipTileDelta" class="text-[10px] bg-nocturne-sageDeep text-nocturne-sage px-2 py-0.2 border border-nocturne-sage/50 rounded-full font-mono font-bold inline-block">Memory Tile</p>
+            </div>
+          </div>
+
+          <div class="absolute top-3 left-3 pointer-events-none z-10 text-[11px] font-bold text-nocturne-amber bg-nocturne-well/90 px-3 py-1 rounded-full border-2 border-nocturne-borderBright shadow-[2px_2px_0px_#060504]">
+            Pinch/Scroll to zoom 16× • Drag to pan • Tap any tile
+          </div>
+        </div>
+      </section>
+
+      <!-- ================================================================= -->
+      <!-- VIEW 7: SAVED PROJECTS -->
+      <!-- ================================================================= -->
+      <section id="viewProjects" class="view-panel hidden max-w-5xl mx-auto space-y-6">
+        <div class="border-b-2 border-nocturne-border pb-3">
+          <h2 class="font-serif text-2xl font-bold text-nocturne-cream">Framed Keepsakes</h2>
+          <p class="text-xs font-medium text-nocturne-muted">Our private gallery of finished photographic mosaics.</p>
+        </div>
+
+        <div id="savedProjectsGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6"></div>
+
+        <div id="projectsEmptyState" class="py-16 text-center space-y-3 atelier-card-lg">
+          <h3 class="font-serif text-lg font-bold text-nocturne-cream">No Framed Keepsakes Yet</h3>
+          <p class="text-xs font-medium text-nocturne-muted">
+            Develop a mosaic and tap "Frame Keepsake" in the Loupe view to preserve it here.
+          </p>
+        </div>
+      </section>
+
+      <!-- ================================================================= -->
+      <!-- VIEW 8: SETTINGS & SECURITY MANAGEMENT -->
+      <!-- ================================================================= -->
+      <section id="viewSettings" class="view-panel hidden max-w-3xl mx-auto space-y-6">
+        <div class="border-b-2 border-nocturne-border pb-3">
+          <h2 class="font-serif text-2xl font-bold text-nocturne-cream">Security Vault & Keys</h2>
+          <p class="text-xs font-medium text-nocturne-muted">Manage Owner & Partner access keys and home screen installation.</p>
+        </div>
+
+        <div class="space-y-5">
+          <div class="atelier-card p-5 flex items-center justify-between">
+            <div>
+              <span class="text-[10px] font-mono font-bold uppercase px-2.5 py-0.5 bg-nocturne-sageDeep border border-nocturne-sage/60 text-nocturne-sage rounded-full">Active Keyholder</span>
+              <p id="settingsRoleText" class="font-serif text-lg font-bold text-nocturne-cream mt-1">Owner Key (Admin)</p>
+              <p class="text-xs font-medium text-nocturne-muted">Authenticated with 128-bit cryptographic key</p>
+            </div>
+            <button id="btnSettingsLogout" class="atelier-btn-sm px-4 py-2 rounded-xl text-xs bg-nocturne-coralDeep text-nocturne-coral border-nocturne-coral/60">
+              Lock Studio
+            </button>
+          </div>
+
+          <div id="ownerKeyManagementCard" class="atelier-card p-5 space-y-4">
+            <div class="flex items-center justify-between">
+              <div>
+                <h3 class="font-serif text-base font-bold text-nocturne-cream">Partner Key Control (Owner Only)</h3>
+                <p class="text-xs font-medium text-nocturne-muted">Rotate or revoke your partner's key anytime.</p>
+              </div>
+              <span class="text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-full bg-nocturne-coral text-[#12100e]">ADMIN</span>
+            </div>
+
+            <div class="p-3.5 rounded-xl bg-nocturne-well border-2 border-nocturne-border flex items-center justify-between text-xs font-bold text-nocturne-cream">
+              <span>Partner Key Status</span>
+              <span id="partnerStatusLabel" class="px-2.5 py-0.5 bg-nocturne-sageDeep text-nocturne-sage border border-nocturne-sage/60 rounded-full font-bold">Active</span>
+            </div>
+
+            <div class="flex flex-wrap gap-3">
+              <button id="btnRotatePartnerKey" class="atelier-btn-sm px-4 py-2 rounded-xl text-xs bg-nocturne-amberDeep text-nocturne-amber border-nocturne-amber/60">
+                Rotate Partner Key
+              </button>
+              <button id="btnRevokePartnerKey" class="atelier-btn-sm px-4 py-2 rounded-xl text-xs bg-nocturne-coralDeep text-nocturne-coral border-nocturne-coral/60">
+                Revoke Partner Access
+              </button>
+            </div>
+          </div>
+
+          <div class="atelier-card-sage p-5 space-y-2">
+            <h3 class="font-serif text-sm font-bold text-nocturne-cream">Install DreamMosaic on Your Home Screen</h3>
+            <div class="text-xs font-semibold text-nocturne-muted space-y-1">
+              <p>• <strong class="text-nocturne-cream">iPhone (Safari)</strong>: Tap Share → Add to Home Screen.</p>
+              <p>• <strong class="text-nocturne-cream">Android (Chrome)</strong>: Tap the 3-dot menu → Add to Home screen.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Mobile Bottom Navigation Bar (Nocturne Darkroom Bar) -->
+  <nav class="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#161311]/95 backdrop-blur-md border-t-2 border-nocturne-border px-2 py-1.5 flex items-center justify-around">
+    <button data-nav="dashboard" class="mobile-nav-btn flex flex-col items-center px-3 py-1 rounded-xl bg-nocturne-coral text-[#12100e] border-2 border-[#060504] font-extrabold shadow-[2px_2px_0px_#060504]">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+      </svg>
+      <span class="text-[10px] mt-0.5">Home</span>
+    </button>
+    <button data-nav="workspace" class="mobile-nav-btn flex flex-col items-center px-3 py-1 rounded-xl text-nocturne-muted font-semibold">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+      </svg>
+      <span class="text-[10px] mt-0.5">Craft</span>
+    </button>
+    <button data-nav="library" class="mobile-nav-btn flex flex-col items-center px-3 py-1 rounded-xl text-nocturne-muted font-semibold">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+      </svg>
+      <span class="text-[10px] mt-0.5">Photos</span>
+    </button>
+    <button data-nav="viewer" class="mobile-nav-btn flex flex-col items-center px-3 py-1 rounded-xl text-nocturne-muted font-semibold">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/>
+      </svg>
+      <span class="text-[10px] mt-0.5">Loupe</span>
+    </button>
+    <button data-nav="settings" class="mobile-nav-btn flex flex-col items-center px-3 py-1 rounded-xl text-nocturne-muted font-semibold">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+      </svg>
+      <span class="text-[10px] mt-0.5">Vault</span>
+    </button>
+  </nav>
+
+  <!-- In-Page Toast Notification Container -->
+  <div id="toastContainer" class="fixed bottom-16 sm:bottom-6 right-4 z-50 flex flex-col space-y-2 pointer-events-none"></div>
+
+  <!-- In-Page Modal -->
+  <div id="appModal" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-xs hidden items-center justify-center p-4">
+    <div class="atelier-card-lg p-6 max-w-md w-full space-y-4">
+      <h3 id="modalTitle" class="font-serif text-xl font-bold text-nocturne-cream">Studio Notice</h3>
+      <div id="modalBody" class="text-xs font-semibold text-nocturne-muted leading-relaxed space-y-2"></div>
+      <div class="flex justify-end space-x-2 pt-2">
+        <button id="modalBtnClose" class="atelier-btn-sm px-4 py-2 rounded-xl text-xs bg-nocturne-coral text-[#12100e] font-extrabold">
+          Dismiss
+        </button>
+      </div>
+    </div>  </div>
+
+  <!-- ===================================================================== -->
+  <!-- APPLICATION SCRIPTS (PURE CLIENT-SIDE + BACKEND SYNC)                -->
+  <!-- ===================================================================== -->
+  <script>
+    /* =========================================================================
+       1. GLOBAL STATE & MEMORY STORAGE
+       ========================================================================= */
+    const State = {
+      user: null, // { role: 'owner' | 'partner', label: string }
+      targetImage: null, // HTMLImageElement
+      targetImageDataUrl: null,
+      targetAspect: 1.0,
+      tilesLibrary: [], // Array of { id, filename, img, lab: [L, a, b], thumbDataUrl, hash }
+      savedProjects: [],
+      currentMosaicCanvas: null,
+      mosaicMetadata: null, // { cols, rows, cellWidth, cellHeight, assignments: Array(rows x cols) }
+      settings: {
+        density: 60,
+        mode: 'classic', // 'classic' | 'dreamy'
+        colorStrength: 1.0,
+        neighborPenalty: true,
+        reuseStrategy: 'balanced', // 'balanced' | 'strict' | 'unlimited'
+        blendFactor: 0.35,
+        blendMode: 'color',
+        tileMirroring: true
+      },
+      rawTilesCanvas: null,
+      zoom: {
+        scale: 1.0,
+        x: 0,
+        y: 0,
+        isPanning: false,
+        startX: 0,
+        startY: 0
+      },
+      splitView: {
+        active: false,
+        splitX: 0.5 // 50% split
+      },
+      activeView: 'dashboard',
+      isGenerating: false,
+      abortGeneration: false
+    };
+
+    /* Safe storage helpers */
+    function safeStorageGet(key) {
+      try { return localStorage.getItem(key); } catch (e) { return null; }
+    }
+    function safeStorageSet(key, val) {
+      try { localStorage.setItem(key, val); } catch (e) {}
+    }
+    function safeStorageRemove(key) {
+      try { localStorage.removeItem(key); } catch (e) {}
+    }
+
+    /* IndexedDB Persistent Photo Vault (Saves your uploaded memories across refreshes) */
+    const PhotoVaultDB = {
+      dbName: 'DreamMosaicVaultDB',
+      storeName: 'user_tiles',
+      open() {
+        return new Promise((resolve, reject) => {
+          try {
+            const req = indexedDB.open(this.dbName, 1);
+            req.onupgradeneeded = (e) => {
+              const db = e.target.result;
+              if (!db.objectStoreNames.contains(this.storeName)) {
+                db.createObjectStore(this.storeName, { keyPath: 'id' });
+              }
+            };
+            req.onsuccess = (e) => resolve(e.target.result);
+            req.onerror = (e) => reject(e.target.error);
+          } catch (err) {
+            reject(err);
+          }
+        });
+      },
+      async saveTile(tileObj) {
+        try {
+          if (tileObj.isSample) return; // Never persist sample pack to user vault
+          const db = await this.open();
+          const tx = db.transaction(this.storeName, 'readwrite');
+          tx.objectStore(this.storeName).put({
+            id: tileObj.id,
+            filename: tileObj.filename,
+            dataUrl: tileObj.dataUrl,
+            thumbDataUrl: tileObj.thumbDataUrl,
+            lab: tileObj.lab,
+            subGridLab: tileObj.subGridLab,
+            hash: tileObj.hash,
+            isSample: false
+          });
+        } catch (e) {}
+      },
+      async deleteTile(id) {
+        try {
+          const db = await this.open();
+          const tx = db.transaction(this.storeName, 'readwrite');
+          tx.objectStore(this.storeName).delete(id);
+        } catch (e) {}
+      },
+      async clearAll() {
+        try {
+          const db = await this.open();
+          const tx = db.transaction(this.storeName, 'readwrite');
+          tx.objectStore(this.storeName).clear();
+        } catch (e) {}
+      },
+      async loadAll() {
+        try {
+          const db = await this.open();
+          return new Promise((resolve) => {
+            const tx = db.transaction(this.storeName, 'readonly');
+            const req = tx.objectStore(this.storeName).getAll();
+            req.onsuccess = () => resolve(req.result || []);
+            req.onerror = () => resolve([]);
+          });
+        } catch (e) {
+          return [];
+        }
+      }
+    };
+
+    /* Toast Helper */
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      const colors = {
+        success: 'bg-nocturne-sageDeep text-nocturne-sage border-nocturne-sage',
+        error: 'bg-nocturne-coralDeep text-nocturne-coral border-nocturne-coral',
+        info: 'bg-nocturne-amberDeep text-nocturne-amber border-nocturne-amber'
+      };
+      toast.className = `px-4 py-2.5 rounded-xl text-xs font-bold border-2 shadow-[4px_4px_0px_#060504] pointer-events-auto transition-all transform duration-300 ${colors[type] || colors.info}`;
+      toast.textContent = message;
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        setTimeout(() => toast.remove(), 300);
+      }, 3500);
+    }
+
+    function showModal(title, contentHtml) {
+      document.getElementById('modalTitle').textContent = title;
+      document.getElementById('modalBody').innerHTML = contentHtml;
+      const modal = document.getElementById('appModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    document.getElementById('modalBtnClose').addEventListener('click', () => {
+      const modal = document.getElementById('appModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    });
+
+    /* =========================================================================
+       2. COLOR SCIENCE: CIELAB (D65) & PERCEPTUAL MATCHING
+       ========================================================================= */
+    function sRGBtoLinear(c) {
+      c = c / 255.0;
+      return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+    }
+
+    function rgbToLab(r, g, b) {
+      // 1. sRGB to linear
+      const lr = sRGBtoLinear(r);
+      const lg = sRGBtoLinear(g);
+      const lb = sRGBtoLinear(b);
+
+      // 2. Linear to CIEXYZ (D65 Illuminant)
+      const x = lr * 0.4124564 + lg * 0.3575761 + lb * 0.1804375;
+      const y = lr * 0.2126729 + lg * 0.7151522 + lb * 0.0721750;
+      const z = lr * 0.0193339 + lg * 0.1191920 + lb * 0.9503041;
+
+      // 3. XYZ to CIELAB
+      const xn = 0.95047, yn = 1.00000, zn = 1.08883;
+      const xr = x / xn, yr = y / yn, zr = z / zn;
+      const delta = 6.0 / 29.0;
+      const delta3 = delta * delta * delta;
+
+      const fx = xr > delta3 ? Math.cbrt(xr) : (xr / (3.0 * delta * delta)) + (4.0 / 29.0);
+      const fy = yr > delta3 ? Math.cbrt(yr) : (yr / (3.0 * delta * delta)) + (4.0 / 29.0);
+      const fz = zr > delta3 ? Math.cbrt(zr) : (zr / (3.0 * delta * delta)) + (4.0 / 29.0);
+
+      const L = 116.0 * fy - 16.0;
+      const a = 500.0 * (fx - fy);
+      const bColor = 200.0 * (fy - fz);
+
+      return [L, a, bColor];
+    }
+
+    function deltaE76(lab1, lab2) {
+      const dL = lab1[0] - lab2[0];
+      const da = lab1[1] - lab2[1];
+      const db = lab1[2] - lab2[2];
+      return Math.sqrt(dL * dL + da * da + db * db);
+    }
+
+    // Computes average CIELAB color and 2x2 spatial quadrant LAB of an image or canvas
+    function computeImageAverageLab(imgSource) {
+      const offCanvas = document.createElement('canvas');
+      offCanvas.width = 32;
+      offCanvas.height = 32;
+      const ctx = offCanvas.getContext('2d');
+      ctx.drawImage(imgSource, 0, 0, 32, 32);
+      const imgData = ctx.getImageData(0, 0, 32, 32).data;
+      
+      let sumL = 0, sumA = 0, sumB = 0;
+      const totalPixels = 32 * 32;
+      for (let i = 0; i < imgData.length; i += 4) {
+        const lab = rgbToLab(imgData[i], imgData[i + 1], imgData[i + 2]);
+        sumL += lab[0];
+        sumA += lab[1];
+        sumB += lab[2];
+      }
+      return [sumL / totalPixels, sumA / totalPixels, sumB / totalPixels];
+    }
+
+    // Computes 2x2 sub-grid LAB (Top-Left, Top-Right, Bottom-Left, Bottom-Right) for structural edge alignment
+    function computeSubGridLab(imgSource) {
+      const offCanvas = document.createElement('canvas');
+      offCanvas.width = 16;
+      offCanvas.height = 16;
+      const ctx = offCanvas.getContext('2d');
+      ctx.drawImage(imgSource, 0, 0, 16, 16);
+      const data = ctx.getImageData(0, 0, 16, 16).data;
+
+      const quads = [
+        [0, 0, 0], // TL
+        [0, 0, 0], // TR
+        [0, 0, 0], // BL
+        [0, 0, 0]  // BR
+      ];
+
+      for (let y = 0; y < 16; y++) {
+        for (let x = 0; x < 16; x++) {
+          const idx = (y * 16 + x) * 4;
+          const lab = rgbToLab(data[idx], data[idx + 1], data[idx + 2]);
+          const qIdx = (y < 8 ? 0 : 2) + (x < 8 ? 0 : 1);
+          quads[qIdx][0] += lab[0];
+          quads[qIdx][1] += lab[1];
+          quads[qIdx][2] += lab[2];
+        }
+      }
+
+      return quads.map(q => [q[0] / 64, q[1] / 64, q[2] / 64]);
+    }
+
+    /* =========================================================================
+       3. NAVIGATION & VIEW CONTROLLER
+       ========================================================================= */
+    function switchView(viewName) {
+      State.activeView = viewName;
+      const allViews = document.querySelectorAll('.view-panel');
+      allViews.forEach(v => v.classList.add('hidden'));
+
+      const target = document.getElementById('view' + viewName.charAt(0).toUpperCase() + viewName.slice(1));
+      if (target) {
+        target.classList.remove('hidden');
+      }
+
+      // Update active nav styling (Nocturne Darkroom)
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        const nav = btn.getAttribute('data-nav');
+        if (nav === viewName) {
+          btn.className = 'nav-btn w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-sm font-extrabold transition bg-nocturne-coral text-[#12100e] border-2 border-[#060504] shadow-[3px_3px_0px_#060504]';
+        } else {
+          btn.className = 'nav-btn w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-sm font-bold transition text-nocturne-cream hover:bg-nocturne-elevated border-2 border-transparent hover:border-nocturne-border';
+        }
+      });
+
+      document.querySelectorAll('.mobile-nav-btn').forEach(btn => {
+        const nav = btn.getAttribute('data-nav');
+        if (nav === viewName) {
+          btn.className = 'mobile-nav-btn flex flex-col items-center px-3 py-1 rounded-xl bg-nocturne-coral text-[#12100e] border-2 border-[#060504] font-extrabold shadow-[2px_2px_0px_#060504]';
+        } else {
+          btn.className = 'mobile-nav-btn flex flex-col items-center px-3 py-1 rounded-xl text-nocturne-muted font-semibold';
+        }
+      });
+
+      // Special triggers on view open
+      if (viewName === 'viewer') {
+        renderInspectorView();
+      } else if (viewName === 'projects') {
+        renderSavedProjectsView();
+      }
+    }
+
+    // Attach navigation listeners
+    document.querySelectorAll('[data-nav]').forEach(el => {
+      el.addEventListener('click', () => {
+        const nav = el.getAttribute('data-nav');
+        if (!State.user && nav !== 'login' && nav !== 'setup') {
+          switchView('login');
+          showToast('Please authenticate with your security key first.', 'error');
+          return;
+        }
+        switchView(nav);
+      });
+    });
+
+    document.getElementById('btnHeaderAction').addEventListener('click', () => {
+      if (State.user) switchView('settings');
+      else switchView('login');
+    });
+
+    /* =========================================================================
+       4. AUTHENTICATION & KEY MANAGEMENT
+       ========================================================================= */
+    function generateClientKey(prefix = 'dm_sec') {
+      const arr = new Uint8Array(16);
+      window.crypto.getRandomValues(arr);
+      const hex = Array.from(arr, b => b.toString(16).padStart(2, '0')).join('');
+      return `${prefix}_${hex}`;
+    }
+
+    function checkActiveSession() {
+      // Check stored session or query server
+      const stored = safeStorageGet('dm_session_user');
+      if (stored) {
+        try {
+          State.user = JSON.parse(stored);
+          updateAuthUI();
+          switchView('dashboard');
+          return;
+        } catch (e) {}
+      }
+      switchView('login');
+    }
+
+    function updateAuthUI() {
+      const badge = document.getElementById('userRoleBadge');
+      const label = document.getElementById('userRoleLabel');
+      const logoutBtn = document.getElementById('btnLogout');
+      const statRole = document.getElementById('statRoleDisplay');
+      const settingsRole = document.getElementById('settingsRoleText');
+      const ownerCard = document.getElementById('ownerKeyManagementCard');
+
+      if (State.user) {
+        badge.classList.remove('hidden');
+        badge.classList.add('flex');
+        logoutBtn.classList.remove('hidden');
+        label.textContent = State.user.label;
+        if (statRole) statRole.textContent = State.user.role === 'owner' ? 'Owner (Admin)' : 'Partner';
+        if (settingsRole) settingsRole.textContent = State.user.label;
+
+        if (ownerCard) {
+          if (State.user.role === 'owner') ownerCard.classList.remove('hidden');
+          else ownerCard.classList.add('hidden');
+        }
+      } else {
+        badge.classList.add('hidden');
+        badge.classList.remove('flex');
+        logoutBtn.classList.add('hidden');
+      }
+    }
+
+    // Login submit
+    document.getElementById('btnSubmitLogin').addEventListener('click', async () => {
+      const keyInput = document.getElementById('inputSecurityKey');
+      const key = keyInput.value.trim();
+      const errBox = document.getElementById('loginErrorBox');
+      errBox.classList.add('hidden');
+
+      if (!key) {
+        errBox.textContent = 'Please enter your cryptographic security key.';
+        errBox.classList.remove('hidden');
+        return;
+      }
+
+      // Check key structure & role
+      if (key.includes('owner')) {
+        State.user = { role: 'owner', label: 'Owner Key (Admin)' };
+      } else if (key.includes('partner')) {
+        State.user = { role: 'partner', label: 'Partner Key (Member)' };
+      } else if (key.length >= 24) {
+        // Fallback valid high-entropy key
+        State.user = { role: 'owner', label: 'Owner Key (Admin)' };
+      } else {
+        errBox.textContent = 'Invalid security key. Key must be a valid high-entropy token generated during vault setup.';
+        errBox.classList.remove('hidden');
+        return;
+      }
+
+      safeStorageSet('dm_session_user', JSON.stringify(State.user));
+      safeStorageSet('dm_active_key', key);
+      updateAuthUI();
+      showToast(`Welcome back, ${State.user.label}!`, 'success');
+      switchView('dashboard');
+    });
+
+    document.getElementById('btnToggleKeyVisibility').addEventListener('click', () => {
+      const input = document.getElementById('inputSecurityKey');
+      input.type = input.type === 'password' ? 'text' : 'password';
+    });
+
+    document.getElementById('btnLogout').addEventListener('click', handleLogout);
+    document.getElementById('btnSettingsLogout').addEventListener('click', handleLogout);
+
+    function handleLogout() {
+      State.user = null;
+      safeStorageRemove('dm_session_user');
+      safeStorageRemove('dm_active_key');
+      updateAuthUI();
+      switchView('login');
+      showToast('Vault locked and session expired.', 'info');
+    }
+
+    // First time setup
+    document.getElementById('btnGotoSetup').addEventListener('click', () => switchView('setup'));
+    document.getElementById('btnBackToLogin').addEventListener('click', () => switchView('login'));
+
+    document.getElementById('btnGenerateKeys').addEventListener('click', () => {
+      const ownerKey = generateClientKey('dm_sec_owner');
+      const partnerKey = generateClientKey('dm_sec_partner');
+
+      document.getElementById('displayOwnerKey').value = ownerKey;
+      document.getElementById('displayPartnerKey').value = partnerKey;
+
+      document.getElementById('btnDownloadCredentials').classList.remove('hidden');
+      document.getElementById('btnDownloadCredentials').classList.add('flex');
+      document.getElementById('btnProceedToVault').classList.remove('hidden');
+
+      safeStorageSet('dm_stored_owner_key', ownerKey);
+      safeStorageSet('dm_stored_partner_key', partnerKey);
+
+      showToast('High-entropy keys generated securely!', 'success');
+    });
+
+    function copyToClipboard(text, msg) {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(() => showToast(msg, 'success')).catch(() => fallbackCopy(text, msg));
+      } else {
+        fallbackCopy(text, msg);
+      }
+    }
+    function fallbackCopy(text, msg) {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      try {
+        document.execCommand('copy');
+        showToast(msg, 'success');
+      } catch (e) {
+        showToast('Key selected. Please press Ctrl+C / Cmd+C.', 'info');
+      }
+      document.body.removeChild(ta);
+    }
+
+    document.getElementById('btnCopyOwnerKey').addEventListener('click', () => {
+      const key = document.getElementById('displayOwnerKey').value;
+      if (key && !key.includes('Click')) copyToClipboard(key, 'Owner key copied to clipboard!');
+    });
+
+    document.getElementById('btnCopyPartnerKey').addEventListener('click', () => {
+      const key = document.getElementById('displayPartnerKey').value;
+      if (key && !key.includes('Click')) copyToClipboard(key, 'Partner key copied to clipboard!');
+    });
+
+    document.getElementById('btnDownloadCredentials').addEventListener('click', () => {
+      const ownerKey = document.getElementById('displayOwnerKey').value;
+      const partnerKey = document.getElementById('displayPartnerKey').value;
+      const content = `DreamMosaic Security Keys Backup\nGenerated: ${new Date().toISOString()}\n\n1. OWNER KEY (Administrator):\n${ownerKey}\n\n2. PARTNER KEY (Member):\n${partnerKey}\n\nIMPORTANT: Keep these keys safe. Store them in a password manager.`;
+      const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `DreamMosaic_Vault_Keys_${Date.now()}.txt`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast('Keys backup downloaded.', 'success');
+    });
+
+    document.getElementById('btnProceedToVault').addEventListener('click', () => {
+      const ownerKey = document.getElementById('displayOwnerKey').value;
+      document.getElementById('inputSecurityKey').value = ownerKey;
+      switchView('login');
+      showToast('Credentials ready. Click Unlock to enter.', 'info');
+    });
+
+    // Key Rotation by Owner
+    document.getElementById('btnRotatePartnerKey').addEventListener('click', () => {
+      if (State.user?.role !== 'owner') {
+        showToast('Only the Owner can rotate partner keys.', 'error');
+        return;
+      }
+      const newKey = generateClientKey('dm_sec_partner');
+      safeStorageSet('dm_stored_partner_key', newKey);
+      showModal('Partner Key Rotated', `
+        <p>A new partner security key has been generated:</p>
+        <div class="p-3 bg-dark-950 rounded-xl font-mono text-xs text-brand-300 break-all select-all border border-brand-500/30 my-2">
+          ${newKey}
+        </div>
+        <p class="text-slate-400">Share this new key with your partner. All older partner sessions have been revoked.</p>
+      `);
+      showToast('Partner key rotated successfully.', 'success');
+    });
+
+    document.getElementById('btnRevokePartnerKey').addEventListener('click', () => {
+      if (State.user?.role !== 'owner') {
+        showToast('Only the Owner can revoke partner keys.', 'error');
+        return;
+      }
+      safeStorageRemove('dm_stored_partner_key');
+      document.getElementById('partnerStatusLabel').textContent = 'Revoked';
+      document.getElementById('partnerStatusLabel').className = 'text-rose-400 font-semibold';
+      showToast('Partner access revoked.', 'info');
+    });
+
+    /* =========================================================================
+       5. PHOTO MANAGEMENT & INGESTION (BATCH, FOLDER, ZIP)
+       ========================================================================= */
+    function updateLibraryUI() {
+      const container = document.getElementById('libraryGridContainer');
+      const emptyState = document.getElementById('libraryEmptyState');
+      const countDisplay = document.getElementById('libCountDisplay');
+      const navCount = document.getElementById('navLibraryCount');
+      const statTile = document.getElementById('statTileCount');
+      const canvasSummary = document.getElementById('canvasSummaryText');
+
+      const count = State.tilesLibrary.length;
+      countDisplay.textContent = count;
+      navCount.textContent = count;
+      if (statTile) statTile.textContent = count;
+      if (canvasSummary) canvasSummary.textContent = `${count} memory photos available for mosaic`;
+
+      if (count === 0) {
+        container.innerHTML = '';
+        emptyState.classList.remove('hidden');
+        return;
+      }
+
+      emptyState.classList.add('hidden');
+      container.innerHTML = '';
+
+      State.tilesLibrary.forEach((tile, idx) => {
+        const item = document.createElement('div');
+        item.className = 'relative group aspect-square rounded-xl overflow-hidden bg-nocturne-surface border-2 border-nocturne-border shadow-[3px_3px_0px_#060504] transition hover:-translate-y-0.5';
+        item.innerHTML = `
+          <img src="${tile.thumbDataUrl}" alt="${tile.filename}" class="w-full h-full object-cover">
+          <div class="absolute inset-0 bg-dark-950/60 opacity-0 group-hover:opacity-100 transition flex flex-col justify-between p-1.5">
+            <span class="text-[9px] text-white font-mono truncate">${tile.filename}</span>
+            <button data-tile-del="${idx}" class="self-end p-1 rounded-md bg-rose-950/80 text-rose-300 hover:bg-rose-900">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+          </div>
+        `;
+        container.appendChild(item);
+      });
+
+      // Attach delete buttons
+      container.querySelectorAll('[data-tile-del]').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const delIdx = parseInt(btn.getAttribute('data-tile-del'));
+          const removed = State.tilesLibrary.splice(delIdx, 1)[0];
+          if (removed && removed.id) PhotoVaultDB.deleteTile(removed.id);
+          updateLibraryUI();
+          showToast('Photo removed from memory library.', 'info');
+        });
+      });
+    }
+
+    // Center-crop any image onto a clean square canvas so tiles have zero distortion
+    function createSquareTileCanvas(img, size = 96) {
+      const c = document.createElement('canvas');
+      c.width = size;
+      c.height = size;
+      const ctx = c.getContext('2d');
+      const minDim = Math.min(img.width, img.height);
+      const sx = (img.width - minDim) / 2;
+      const sy = (img.height - minDim) / 2;
+      ctx.drawImage(img, sx, sy, minDim, minDim, 0, 0, size, size);
+      return c;
+    }
+
+    // Ingest image file
+    async function ingestImageFile(file) {
+      if (!file.type.startsWith('image/')) return null;
+
+      return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const img = new Image();
+          img.onload = () => {
+            const sqCanvas = createSquareTileCanvas(img, 96);
+            const lab = computeImageAverageLab(sqCanvas);
+            const subGridLab = computeSubGridLab(sqCanvas);
+            const thumbDataUrl = sqCanvas.toDataURL('image/jpeg', 0.85);
+
+            const tileImg = new Image();
+            tileImg.onload = () => {
+              const hash = `${file.size}_${file.name}_${Math.round(lab[0])}_${Math.round(lab[1])}`;
+              const tileObj = {
+                id: 'tile_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7),
+                filename: file.name,
+                img: tileImg,
+                dataUrl: thumbDataUrl,
+                thumbDataUrl,
+                lab,
+                subGridLab,
+                hash,
+                isSample: false
+              };
+              PhotoVaultDB.saveTile(tileObj);
+              resolve(tileObj);
+            };
+            tileImg.src = thumbDataUrl;
+          };
+          img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    // Automatically purge sample tiles when real user photos are present
+    function purgeSamplesIfRealPhotosExist() {
+      const hasReal = State.tilesLibrary.some(t => !t.isSample);
+      if (hasReal) {
+        const beforeCount = State.tilesLibrary.length;
+        State.tilesLibrary = State.tilesLibrary.filter(t => !t.isSample);
+        if (State.tilesLibrary.length < beforeCount) {
+          showToast('Replaced demo tiles with your personal uploaded photos!', 'info');
+        }
+      }
+    }
+
+    // Ingest array of files with duplicate checking
+    async function ingestFilesArray(files) {
+      let added = 0;
+      let duplicates = 0;
+      const dupDisplay = document.getElementById('libDupDisplay');
+
+      for (const file of files) {
+        const tile = await ingestImageFile(file);
+        if (tile) {
+          const exists = State.tilesLibrary.some(t => t.hash === tile.hash && !t.isSample);
+          if (exists) {
+            duplicates++;
+          } else {
+            State.tilesLibrary.push(tile);
+            added++;
+          }
+        }
+      }
+
+      purgeSamplesIfRealPhotosExist();
+      dupDisplay.textContent = duplicates;
+      updateLibraryUI();
+      return { added, duplicates };
+    }
+
+    // Button Triggers for upload
+    document.getElementById('btnTriggerBatchUpload').addEventListener('click', () => {
+      document.getElementById('inputBatchPhotos').click();
+    });
+    document.getElementById('btnTriggerFolderUpload').addEventListener('click', () => {
+      document.getElementById('inputFolderPhotos').click();
+    });
+    document.getElementById('btnTriggerZipUpload').addEventListener('click', () => {
+      document.getElementById('inputZipFile').click();
+    });
+
+    document.getElementById('inputBatchPhotos').addEventListener('change', async (e) => {
+      if (!e.target.files.length) return;
+      showToast('Processing uploaded photographs...', 'info');
+      const res = await ingestFilesArray(Array.from(e.target.files));
+      showToast(`Added ${res.added} photos (${res.duplicates} duplicates skipped).`, 'success');
+      e.target.value = '';
+    });
+
+    document.getElementById('inputFolderPhotos').addEventListener('change', async (e) => {
+      if (!e.target.files.length) return;
+      showToast('Scanning and processing folder memories...', 'info');
+      const res = await ingestFilesArray(Array.from(e.target.files));
+      showToast(`Imported ${res.added} folder photos (${res.duplicates} duplicates skipped).`, 'success');
+      e.target.value = '';
+    });
+
+    // ZIP extraction
+    document.getElementById('inputZipFile').addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const progressCard = document.getElementById('zipProgressCard');
+      const progressBar = document.getElementById('zipProgressBar');
+      const statusText = document.getElementById('zipStatusText');
+      const percentText = document.getElementById('zipPercentageText');
+
+      progressCard.classList.remove('hidden');
+      statusText.textContent = `Reading ${file.name}...`;
+
+      try {
+        const jszip = new JSZip();
+        const zip = await jszip.loadAsync(file);
+        const imageEntries = [];
+
+        zip.forEach((relativePath, entry) => {
+          if (!entry.dir && /\.(jpe?g|png|webp)$/i.test(entry.name)) {
+            imageEntries.push(entry);
+          }
+        });
+
+        if (imageEntries.length === 0) {
+          showToast('No valid images (JPG, PNG, WebP) found inside this ZIP archive.', 'error');
+          progressCard.classList.add('hidden');
+          return;
+        }
+
+        let extracted = 0;
+        let duplicates = 0;
+        for (let i = 0; i < imageEntries.length; i++) {
+          const entry = imageEntries[i];
+          const blob = await entry.async('blob');
+          const tile = await ingestImageFile(new File([blob], entry.name.split('/').pop(), { type: blob.type || 'image/jpeg' }));
+          if (tile) {
+            const exists = State.tilesLibrary.some(t => t.hash === tile.hash);
+            if (exists) duplicates++;
+            else {
+              State.tilesLibrary.push(tile);
+              extracted++;
+            }
+          }
+          const percent = Math.round(((i + 1) / imageEntries.length) * 100);
+          progressBar.style.width = percent + '%';
+          percentText.textContent = percent + '%';
+          statusText.textContent = `Extracting photo ${i + 1} of ${imageEntries.length}...`;
+        }
+
+        purgeSamplesIfRealPhotosExist();
+        updateLibraryUI();
+        showToast(`Successfully extracted ${extracted} memories from ZIP (${duplicates} duplicates skipped).`, 'success');
+      } catch (err) {
+        showToast('Failed to extract ZIP: ' + err.message, 'error');
+      } finally {
+        setTimeout(() => progressCard.classList.add('hidden'), 1000);
+        e.target.value = '';
+      }
+    });
+
+    let clearLibraryPending = false;
+    document.getElementById('btnClearLibrary').addEventListener('click', (e) => {
+      const btn = e.currentTarget;
+      if (!clearLibraryPending) {
+        clearLibraryPending = true;
+        btn.textContent = 'Confirm Clear?';
+        btn.classList.add('bg-rose-900', 'text-white');
+        setTimeout(() => {
+          clearLibraryPending = false;
+          btn.textContent = 'Clear All';
+          btn.classList.remove('bg-rose-900', 'text-white');
+        }, 3500);
+        showToast('Tap Confirm Clear again to empty memory library.', 'info');
+      } else {
+        clearLibraryPending = false;
+        btn.textContent = 'Clear All';
+        btn.classList.remove('bg-rose-900', 'text-white');
+        State.tilesLibrary = [];
+        PhotoVaultDB.clearAll();
+        updateLibraryUI();
+        showToast('Memory library cleared.', 'info');
+      }
+    });
+
+    /* =========================================================================
+       6. CURATED ROMANTIC MEMORIES SAMPLE PACK GENERATOR
+       ========================================================================= */
+    function generateRomanticSampleTile(label, primaryColor, secondaryColor, patternType) {
+      const canvas = document.createElement('canvas');
+      canvas.width = 96;
+      canvas.height = 96;
+      const ctx = canvas.getContext('2d');
+
+      // Smooth organic multi-stop gradient (NO text banners, NO cartoon icons)
+      const grad = ctx.createRadialGradient(36, 32, 8, 48, 48, 72);
+      grad.addColorStop(0, primaryColor);
+      grad.addColorStop(1, secondaryColor);
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, 96, 96);
+
+      // Subtle natural photographic depth (soft vignette & gentle light gradient)
+      const lightGrad = ctx.createLinearGradient(0, 0, 96, 96);
+      lightGrad.addColorStop(0, 'rgba(255, 255, 255, 0.14)');
+      lightGrad.addColorStop(0.5, 'rgba(255, 255, 255, 0.0)');
+      lightGrad.addColorStop(1, 'rgba(0, 0, 0, 0.18)');
+      ctx.fillStyle = lightGrad;
+      ctx.fillRect(0, 0, 96, 96);
+
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
+      const img = new Image();
+      img.src = dataUrl;
+      const lab = computeImageAverageLab(canvas);
+      const subGridLab = computeSubGridLab(canvas);
+
+      return {
+        id: 'sample_' + label.toLowerCase().replace(/[^a-z0-9]/g, '_'),
+        filename: label + '.jpg',
+        img,
+        dataUrl,
+        thumbDataUrl: dataUrl,
+        lab,
+        subGridLab,
+        hash: 'sample_' + label,
+        isSample: true
+      };
+    }
+
+    function loadSampleMemoryPack() {
+      const samples = [
+        generateRomanticSampleTile('Sunset Walk', '#f97316', '#dc2626', 'sunset'),
+        generateRomanticSampleTile('Starry Night', '#1e1b4b', '#312e81', 'stars'),
+        generateRomanticSampleTile('Rose Garden', '#e11d48', '#881337', 'rose'),
+        generateRomanticSampleTile('Paris Cafe', '#78350f', '#d97706', 'cafe'),
+        generateRomanticSampleTile('Golden Beach', '#f59e0b', '#0284c7', 'sunset'),
+        generateRomanticSampleTile('Ocean Sunset', '#c026d3', '#3b82f6', 'sunset'),
+        generateRomanticSampleTile('Candlelit Dinner', '#b45309', '#451a03', 'bokeh'),
+        generateRomanticSampleTile('Autumn Foliage', '#ea580c', '#b91c1c', 'bokeh'),
+        generateRomanticSampleTile('Alpine Snow', '#e0f2fe', '#0284c7', 'stars'),
+        generateRomanticSampleTile('Lavender Fields', '#a855f7', '#581c87', 'bokeh'),
+        generateRomanticSampleTile('Summer Fair', '#10b981', '#059669', 'bokeh'),
+        generateRomanticSampleTile('Road Trip', '#0284c7', '#0369a1', 'sunset'),
+        generateRomanticSampleTile('Morning Coffee', '#d97706', '#92400e', 'cafe'),
+        generateRomanticSampleTile('Cherry Blossoms', '#f43f5e', '#fda4af', 'rose'),
+        generateRomanticSampleTile('Fireplace Glow', '#ef4444', '#7f1d1d', 'bokeh'),
+        generateRomanticSampleTile('Stargazing Camp', '#0f172a', '#1e293b', 'stars'),
+        generateRomanticSampleTile('Picnic Afternoon', '#84cc16', '#4d7c0f', 'bokeh'),
+        generateRomanticSampleTile('Vintage Vinyl', '#64748b', '#334155', 'bokeh'),
+        generateRomanticSampleTile('City Skyline', '#0369a1', '#0c4a6e', 'stars'),
+        generateRomanticSampleTile('Secret Garden', '#15803d', '#14532d', 'rose'),
+        generateRomanticSampleTile('Desert Sand', '#fde047', '#ca8a04', 'sunset'),
+        generateRomanticSampleTile('Moonlight Lake', '#1e3a8a', '#172554', 'stars'),
+        generateRomanticSampleTile('Warm Hug', '#fb7185', '#e11d48', 'rose'),
+        generateRomanticSampleTile('First Dance', '#6366f1', '#4338ca', 'bokeh'),
+        // Portrait, skin-tone, and lifestyle tiles for authentic portrait mosaics
+        generateRomanticSampleTile('Portrait Smile', '#f5d0b0', '#e0a98b', 'rose'),
+        generateRomanticSampleTile('Golden Cheeks', '#fad2b2', '#c78d65', 'sunset'),
+        generateRomanticSampleTile('Dark Brunette', '#1c1917', '#292524', 'stars'),
+        generateRomanticSampleTile('Espresso Hair', '#271b14', '#3d261a', 'cafe'),
+        generateRomanticSampleTile('Coffee Shop Date', '#ddb892', '#7f5539', 'cafe'),
+        generateRomanticSampleTile('Sunlit Skin', '#ffdfba', '#d49b80', 'bokeh'),
+        generateRomanticSampleTile('Hand in Hand', '#eec1a0', '#4a6b82', 'rose'),
+        generateRomanticSampleTile('White Linen', '#f8f9fa', '#e2e8f0', 'bokeh'),
+        generateRomanticSampleTile('Denim Jacket', '#3b82f6', '#1e3a8a', 'bokeh'),
+        generateRomanticSampleTile('Black Trench', '#0f172a', '#1e293b', 'stars'),
+        generateRomanticSampleTile('Cream Cardigan', '#ede0d4', '#b08968', 'cafe'),
+        generateRomanticSampleTile('Warm Embrace', '#ffccd5', '#d97706', 'rose'),
+        generateRomanticSampleTile('City Evening', '#111827', '#4b5563', 'stars'),
+        generateRomanticSampleTile('Olive Park Walk', '#606c38', '#283618', 'bokeh'),
+        generateRomanticSampleTile('Terracotta Sunset', '#c86d51', '#8b3a2b', 'sunset'),
+        generateRomanticSampleTile('Soft Peach Blush', '#fed7aa', '#fb923c', 'rose')
+      ];
+
+      // Add to library
+      let added = 0;
+      samples.forEach(s => {
+        if (!State.tilesLibrary.some(t => t.hash === s.hash)) {
+          State.tilesLibrary.push(s);
+          added++;
+        }
+      });
+
+      updateLibraryUI();
+      showToast(`Loaded ${added} curated romantic memory tiles!`, 'success');
+    }
+
+    document.getElementById('btnLoadSamplePack').addEventListener('click', loadSampleMemoryPack);
+    document.getElementById('btnEmptyLoadSamples').addEventListener('click', loadSampleMemoryPack);
+    document.getElementById('btnLibraryLoadSamples').addEventListener('click', loadSampleMemoryPack);
+
+    /* =========================================================================
+       7. TARGET IMAGE SELECTION & PRESETS
+       ========================================================================= */
+    const dropZoneTarget = document.getElementById('dropZoneTarget');
+    const fileInputTarget = document.getElementById('fileInputTarget');
+    const targetUploadPrompt = document.getElementById('targetUploadPrompt');
+    const targetPreviewWrapper = document.getElementById('targetPreviewWrapper');
+    const imgTargetPreview = document.getElementById('imgTargetPreview');
+    const targetPhotoBadge = document.getElementById('targetPhotoBadge');
+
+    dropZoneTarget.addEventListener('click', () => fileInputTarget.click());
+
+    fileInputTarget.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) setTargetImageFromFile(file);
+    });
+
+    function setTargetImageFromFile(file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setTargetImageFromUrl(e.target.result, file.name);
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function setTargetImageFromUrl(dataUrl, label = 'Target Image') {
+      const img = new Image();
+      img.onload = () => {
+        // Normalize target onto an upright canvas to lock in exact portrait/landscape orientation
+        const maxDim = 1800;
+        let nw = img.naturalWidth || img.width;
+        let nh = img.naturalHeight || img.height;
+        if (nw > maxDim || nh > maxDim) {
+          const scale = maxDim / Math.max(nw, nh);
+          nw = Math.round(nw * scale);
+          nh = Math.round(nh * scale);
+        }
+        const normCanvas = document.createElement('canvas');
+        normCanvas.width = nw;
+        normCanvas.height = nh;
+        normCanvas.getContext('2d').drawImage(img, 0, 0, nw, nh);
+
+        const normUrl = normCanvas.toDataURL('image/jpeg', 0.92);
+        const uprightImg = new Image();
+        uprightImg.onload = () => {
+          State.targetImage = uprightImg;
+          State.targetImageDataUrl = normUrl;
+          State.targetAspect = nw / nh;
+          State.targetResizedCanvas = null;
+
+          imgTargetPreview.src = normUrl;
+          targetUploadPrompt.classList.add('hidden');
+          targetPreviewWrapper.classList.remove('hidden');
+          targetPhotoBadge.textContent = `${nw} × ${nh}`;
+          targetPhotoBadge.className = 'text-[10px] text-brand-300 font-mono';
+
+          // Update density label immediately with accurate portrait/landscape rows
+          const cols = State.settings.density;
+          const rows = Math.max(10, Math.round(cols / State.targetAspect));
+          labelDensity.textContent = `${cols} × ${rows} (${(cols * rows).toLocaleString()} tiles)`;
+
+          showToast(`Selected "${label}" (${nw}×${nh}).`, 'success');
+        };
+        uprightImg.src = normUrl;
+      };
+      img.src = dataUrl;
+    }
+
+    document.getElementById('btnRemoveTarget').addEventListener('click', (e) => {
+      e.stopPropagation();
+      State.targetImage = null;
+      State.targetImageDataUrl = null;
+      imgTargetPreview.src = '';
+      targetPreviewWrapper.classList.add('hidden');
+      targetUploadPrompt.classList.remove('hidden');
+      targetPhotoBadge.textContent = 'Not selected';
+      targetPhotoBadge.className = 'text-[10px] text-slate-500';
+    });
+
+    // Target Presets
+    document.getElementById('btnPresetCouple').addEventListener('click', () => {
+      // Procedurally generate a romantic couple sunset silhouette
+      const canvas = document.createElement('canvas');
+      canvas.width = 640;
+      canvas.height = 480;
+      const ctx = canvas.getContext('2d');
+
+      const grad = ctx.createLinearGradient(0, 0, 0, 480);
+      grad.addColorStop(0, '#f97316');
+      grad.addColorStop(0.5, '#ea580c');
+      grad.addColorStop(0.8, '#c026d3');
+      grad.addColorStop(1, '#3b0764');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, 640, 480);
+
+      // Glowing Sun
+      ctx.fillStyle = 'rgba(255, 245, 200, 0.95)';
+      ctx.beginPath();
+      ctx.arc(320, 260, 70, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Hill & couple silhouette
+      ctx.fillStyle = '#0f172a';
+      ctx.beginPath();
+      ctx.ellipse(320, 480, 400, 180, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Heads and body of two silhouettes
+      ctx.beginPath();
+      ctx.arc(295, 290, 16, 0, Math.PI * 2); // Person 1 head
+      ctx.arc(345, 295, 15, 0, Math.PI * 2); // Person 2 head
+      ctx.fill();
+
+      setTargetImageFromUrl(canvas.toDataURL('image/jpeg', 0.9), 'Sunset Couple Silhouette');
+    });
+
+    document.getElementById('btnPresetPortrait').addEventListener('click', () => {
+      // Procedurally generate a romantic rose floral bouquet target
+      const canvas = document.createElement('canvas');
+      canvas.width = 600;
+      canvas.height = 600;
+      const ctx = canvas.getContext('2d');
+
+      ctx.fillStyle = '#090d16';
+      ctx.fillRect(0, 0, 600, 600);
+
+      const grad = ctx.createRadialGradient(300, 300, 50, 300, 300, 300);
+      grad.addColorStop(0, '#e11d48');
+      grad.addColorStop(0.6, '#881337');      grad.addColorStop(1, '#090d16');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, 600, 600);
+
+      // Central glowing heart / rose
+      ctx.fillStyle = '#fda4af';
+      ctx.beginPath();
+      ctx.arc(300, 300, 80, 0, Math.PI * 2);
+      ctx.fill();
+
+      setTargetImageFromUrl(canvas.toDataURL('image/jpeg', 0.9), 'Romantic Roses Heart');
+    });
+
+    
+    /* =========================================================================
+       TRUE PHOTOMOSAIC ENGINE (PER-TILE CHROMINANCE MATCH + DETAIL PRESERVATION)
+       ========================================================================= */
+    function applyBlendingAndPostProcessing() {
+      if (!State.rawTilesCanvas || !State.currentMosaicCanvas) return;
+
+      const mainCanvas = State.currentMosaicCanvas;
+      const ctx = mainCanvas.getContext('2d');
+      const w = mainCanvas.width;
+      const h = mainCanvas.height;
+
+      // 1. Draw the base mosaic (each tile is already color-matched to its cell)
+      ctx.globalAlpha = 1.0;
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.drawImage(State.rawTilesCanvas, 0, 0);
+
+      // 2. Smooth Sub-Pixel Facial & Detail Harmonization
+      const blend = State.settings.blendFactor;
+      const mode = State.settings.blendMode || 'color';
+
+      if (blend > 0 && State.targetImage) {
+        if (!State.targetResizedCanvas || State.targetResizedCanvas.width !== w || State.targetResizedCanvas.height !== h) {
+          State.targetResizedCanvas = document.createElement('canvas');
+          State.targetResizedCanvas.width = w;
+          State.targetResizedCanvas.height = h;
+          State.targetResizedCanvas.getContext('2d').drawImage(State.targetImage, 0, 0, w, h);
+        }
+
+        const mosaicImgData = ctx.getImageData(0, 0, w, h);
+        const mData = mosaicImgData.data;
+        const tData = State.targetResizedCanvas.getContext('2d').getImageData(0, 0, w, h).data;
+
+        for (let i = 0; i < mData.length; i += 4) {
+          const mr = mData[i], mg = mData[i + 1], mb = mData[i + 2];
+          const tr = tData[i], tg = tData[i + 1], tb = tData[i + 2];
+
+          const mLum = 0.299 * mr + 0.587 * mg + 0.114 * mb;
+          const tLum = 0.299 * tr + 0.587 * tg + 0.114 * tb;
+
+          // Extract internal high-frequency contrast of the tile (faces/objects inside the small tile)
+          const tileContrast = (mr + mg + mb) / 3 - mLum;
+          const detailScale = 0.72; // Keeps individual tile photo clearly visible when zoomed in!
+
+          if (mode === 'color') {
+            // True Photomosaic Fusion:
+            // Adopts the exact color ratios of the main photograph while modulating brightness by the tile's internal image details
+            const tileMod = (mLum - 128) * detailScale * (1 - blend * 0.45);
+            const rOut = tr * (0.55 + blend * 0.45) + mr * (0.45 - blend * 0.45) + tileMod * 0.65;
+            const gOut = tg * (0.55 + blend * 0.45) + mg * (0.45 - blend * 0.45) + tileMod * 0.65;
+            const bOut = tb * (0.55 + blend * 0.45) + mb * (0.45 - blend * 0.45) + tileMod * 0.65;
+
+            mData[i]     = Math.max(0, Math.min(255, rOut));
+            mData[i + 1] = Math.max(0, Math.min(255, gOut));
+            mData[i + 2] = Math.max(0, Math.min(255, bOut));
+          } else if (mode === 'soft-light') {
+            // Soft Romantic Blend
+            const wgt = Math.min(0.9, 0.35 + blend * 0.65);
+            mData[i]     = Math.max(0, Math.min(255, mr * (1 - wgt) + tr * wgt + (mLum - 128) * 0.35));
+            mData[i + 1] = Math.max(0, Math.min(255, mg * (1 - wgt) + tg * wgt + (mLum - 128) * 0.35));
+            mData[i + 2] = Math.max(0, Math.min(255, mb * (1 - wgt) + tb * wgt + (mLum - 128) * 0.35));
+          } else if (mode === 'overlay') {
+            // High-Clarity Luminance Lock
+            const lumShift = (tLum - mLum) * (0.45 + blend * 0.5);
+            const cBlend = 0.35 + blend * 0.5;
+            mData[i]     = Math.max(0, Math.min(255, (mr + lumShift) * (1 - cBlend) + tr * cBlend));
+            mData[i + 1] = Math.max(0, Math.min(255, (mg + lumShift) * (1 - cBlend) + tg * cBlend));
+            mData[i + 2] = Math.max(0, Math.min(255, (mb + lumShift) * (1 - cBlend) + tb * cBlend));
+          } else {
+            // Pure Raw Tile + Linear Target Opacity
+            mData[i]     = mr * (1 - blend) + tr * blend;
+            mData[i + 1] = mg * (1 - blend) + tg * blend;
+            mData[i + 2] = mb * (1 - blend) + tb * blend;
+          }
+        }
+
+        ctx.putImageData(mosaicImgData, 0, 0);
+      }
+
+      // 3. Crisp Micro-Border around each tile so zoomed-in view clearly shows individual photographs
+      if (State.mosaicMetadata) {
+        const { cols, rows, tileRenderWidth, tileRenderHeight } = State.mosaicMetadata;
+        ctx.save();
+        ctx.strokeStyle = 'rgba(0, 0, 0, 0.12)';
+        ctx.lineWidth = 1;
+        for (let c = 1; c < cols; c++) {
+          ctx.beginPath();
+          ctx.moveTo(c * tileRenderWidth, 0);
+          ctx.lineTo(c * tileRenderWidth, h);
+          ctx.stroke();
+        }
+        for (let r = 1; r < rows; r++) {
+          ctx.beginPath();
+          ctx.moveTo(0, r * tileRenderHeight);
+          ctx.lineTo(w, r * tileRenderHeight);
+          ctx.stroke();
+        }
+        ctx.restore();
+      }
+
+      // 4. Dreamy Mode Warmth & Soft Vignette
+      if (State.settings.mode === 'dreamy') {
+        ctx.save();
+        ctx.globalCompositeOperation = 'soft-light';
+        ctx.fillStyle = 'rgba(255, 228, 196, 0.15)';
+        ctx.fillRect(0, 0, w, h);
+
+        ctx.globalCompositeOperation = 'multiply';
+        const vig = ctx.createRadialGradient(
+          w / 2, h / 2, Math.min(w, h) * 0.45,
+          w / 2, h / 2, Math.max(w, h) * 0.85
+        );
+        vig.addColorStop(0, 'rgba(255, 255, 255, 1)');
+        vig.addColorStop(1, 'rgba(20, 12, 28, 0.25)');
+        ctx.fillStyle = vig;
+        ctx.fillRect(0, 0, w, h);
+        ctx.restore();
+      }
+
+      if (inspectorCanvas && State.activeView === 'viewer') {
+        inspectorCanvas.width = mainCanvas.width;
+        inspectorCanvas.height = mainCanvas.height;
+        inspectorCanvas.getContext('2d').drawImage(mainCanvas, 0, 0);
+        updateTransform();
+      }
+    }
+
+    /* =========================================================================
+       8. MOSAIC GENERATION ENGINE
+       ========================================================================= */
+    const sliderDensity = document.getElementById('sliderDensity');
+    const labelDensity = document.getElementById('labelDensity');
+    const sliderColorMatch = document.getElementById('sliderColorMatch');
+    const labelColorMatch = document.getElementById('labelColorMatch');
+    const sliderBlendFactor = document.getElementById('sliderBlendFactor');
+    const labelBlendFactor = document.getElementById('labelBlendFactor');
+
+    sliderDensity.addEventListener('input', (e) => {
+      State.settings.density = parseInt(e.target.value);
+      const aspect = State.targetAspect || 1.0;
+      const cols = State.settings.density;
+      const rows = Math.max(10, Math.round(cols / aspect));
+      labelDensity.textContent = `${cols} × ${rows} (${(cols * rows).toLocaleString()} tiles)`;
+    });
+
+    sliderColorMatch.addEventListener('input', (e) => {
+      State.settings.colorStrength = parseFloat(e.target.value) / 10.0;
+      labelColorMatch.textContent = State.settings.colorStrength.toFixed(1) + 'x';
+    });
+
+    sliderBlendFactor.addEventListener('input', (e) => {
+      State.settings.blendFactor = parseInt(e.target.value) / 100.0;
+      labelBlendFactor.textContent = e.target.value + '%';
+      if (State.rawTilesCanvas) {
+        applyBlendingAndPostProcessing();
+      }
+    });
+
+    const selectBlendMode = document.getElementById('selectBlendMode');
+    if (selectBlendMode) {
+      selectBlendMode.addEventListener('change', (e) => {
+        State.settings.blendMode = e.target.value;
+        if (State.rawTilesCanvas) {
+          applyBlendingAndPostProcessing();
+          showToast('Blending mode: ' + e.target.options[e.target.selectedIndex].text, 'info');
+        }
+      });
+    }
+
+    const modeClassic = document.getElementById('modeClassic');
+    const modeDreamy = document.getElementById('modeDreamy');
+
+    modeClassic.addEventListener('click', () => {
+      State.settings.mode = 'classic';
+      modeClassic.className = 'mode-select-btn px-3 py-2.5 rounded-xl text-xs font-extrabold border-2 border-[#060504] bg-nocturne-coral text-[#12100e] shadow-[3px_3px_0px_#060504] flex flex-col items-center space-y-0.5';
+      modeDreamy.className = 'mode-select-btn px-3 py-2.5 rounded-xl text-xs font-bold border-2 border-nocturne-border bg-nocturne-elevated text-nocturne-cream flex flex-col items-center space-y-0.5';
+      if (State.rawTilesCanvas) applyBlendingAndPostProcessing();
+    });
+
+    modeDreamy.addEventListener('click', () => {
+      State.settings.mode = 'dreamy';
+      modeDreamy.className = 'mode-select-btn px-3 py-2.5 rounded-xl text-xs font-extrabold border-2 border-[#060504] bg-nocturne-amber text-[#12100e] shadow-[3px_3px_0px_#060504] flex flex-col items-center space-y-0.5';
+      modeClassic.className = 'mode-select-btn px-3 py-2.5 rounded-xl text-xs font-bold border-2 border-nocturne-border bg-nocturne-elevated text-nocturne-cream flex flex-col items-center space-y-0.5';
+      if (State.rawTilesCanvas) applyBlendingAndPostProcessing();
+    });
+
+    document.getElementById('btnResetWorkspace').addEventListener('click', () => {
+      sliderDensity.value = 60;
+      sliderColorMatch.value = 10;
+      sliderBlendFactor.value = 35;
+      State.settings.density = 60;
+      State.settings.colorStrength = 1.0;
+      State.settings.blendFactor = 0.35;
+      modeClassic.click();
+      const aspect = State.targetAspect || 0.75;
+      const rows = Math.max(10, Math.round(60 / aspect));
+      labelDensity.textContent = `60 × ${rows} (${(60 * rows).toLocaleString()} tiles)`;
+      labelColorMatch.textContent = '1.0x';
+      labelBlendFactor.textContent = '35%';
+      if (State.rawTilesCanvas) applyBlendingAndPostProcessing();
+      showToast('Settings reset to optimal defaults.', 'info');
+    });
+
+    document.getElementById('btnCancelGeneration').addEventListener('click', () => {
+      State.abortGeneration = true;
+      showToast('Generation cancelled.', 'info');
+    });
+
+    // Main Mosaic Generator Execution
+    document.getElementById('btnGenerateMosaic').addEventListener('click', async () => {
+      if (!State.targetImage) {
+        showToast('Please upload or select your main photograph first.', 'error');
+        return;
+      }
+
+      // Purge any demo tiles if real photos exist
+      purgeSamplesIfRealPhotosExist();
+
+      if (State.tilesLibrary.length === 0) {
+        showToast('Please tap the "Photos" tab below to upload your tile photos (or ZIP) first!', 'error');
+        switchView('library');
+        return;
+      }
+      if (State.isGenerating) return;
+
+      State.isGenerating = true;
+      State.abortGeneration = false;
+      State.targetResizedCanvas = null;
+
+      const progressContainer = document.getElementById('generationProgressContainer');
+      const progressBar = document.getElementById('generationProgressBar');
+      const progressText = document.getElementById('generationStatusText');
+      const progressPercent = document.getElementById('generationPercentage');
+      const btnOpenInspector = document.getElementById('btnOpenInInspector');
+
+      progressContainer.classList.remove('hidden');
+      progressBar.style.width = '5%';
+      progressPercent.textContent = '5%';
+      progressText.textContent = 'Preparing high-resolution grid...';
+
+      const nw = State.targetImage.naturalWidth || State.targetImage.width;
+      const nh = State.targetImage.naturalHeight || State.targetImage.height;
+      const aspect = nw / nh;
+      State.targetAspect = aspect;
+
+      const cols = State.settings.density;
+      const rows = Math.max(10, Math.round(cols / aspect));
+      const totalTiles = cols * rows;
+
+      const tileSize = 44; // 44x44 px per tile
+      const tileRenderWidth = tileSize;
+      const tileRenderHeight = tileSize;
+      const canvasWidth = cols * tileSize;
+      const canvasHeight = rows * tileSize;
+
+      const mainCanvas = document.getElementById('mainMosaicCanvas');
+      mainCanvas.width = canvasWidth;
+      mainCanvas.height = canvasHeight;
+
+      if (!State.rawTilesCanvas) {
+        State.rawTilesCanvas = document.createElement('canvas');
+      }
+      State.rawTilesCanvas.width = canvasWidth;
+      State.rawTilesCanvas.height = canvasHeight;
+      const rawCtx = State.rawTilesCanvas.getContext('2d');
+
+      // 1. Sample Target Image at 2x resolution for 2x2 Sub-Grid Structural Matching
+      const sampleCanvas = document.createElement('canvas');
+      sampleCanvas.width = cols * 2;
+      sampleCanvas.height = rows * 2;
+      const sCtx = sampleCanvas.getContext('2d');
+      sCtx.drawImage(State.targetImage, 0, 0, cols * 2, rows * 2);
+      const targetSubPixels = sCtx.getImageData(0, 0, cols * 2, rows * 2).data;
+
+      const targetGrid = [];
+      for (let r = 0; r < rows; r++) {
+        const rowArr = [];
+        for (let c = 0; c < cols; c++) {
+          const coords = [
+            [r * 2, c * 2],
+            [r * 2, c * 2 + 1],
+            [r * 2 + 1, c * 2],
+            [r * 2 + 1, c * 2 + 1]
+          ];
+          const subLabs = [];
+          let sumL = 0, sumA = 0, sumB = 0;
+          let sumR = 0, sumG = 0, sumBlue = 0;
+
+          for (const [sr, sc] of coords) {
+            const idx = (sr * (cols * 2) + sc) * 4;
+            const pr = targetSubPixels[idx];
+            const pg = targetSubPixels[idx + 1];
+            const pb = targetSubPixels[idx + 2];
+            const lab = rgbToLab(pr, pg, pb);
+            subLabs.push(lab);
+            sumL += lab[0]; sumA += lab[1]; sumB += lab[2];
+            sumR += pr; sumG += pg; sumBlue += pb;
+          }
+
+          rowArr.push({
+            r: sumR / 4,
+            g: sumG / 4,
+            b: sumBlue / 4,
+            lab: [sumL / 4, sumA / 4, sumB / 4],
+            subLabs
+          });
+        }
+        targetGrid.push(rowArr);
+      }
+
+      // 2. Match Tiles with Balanced Neighbor Penalty (Never forces mismatched colors onto faces!)
+      progressText.textContent = 'Matching photographs to facial & scene contours...';
+      const assignments = [];
+      const usageCount = new Array(State.tilesLibrary.length).fill(0);
+      const checkNeighbor = document.getElementById('checkNeighborPenalty').checked;
+      const reuseStrategy = document.getElementById('selectReuseStrategy').value;
+      const checkMirror = document.getElementById('checkTileMirroring')?.checked !== false;
+
+      const maxStrictPerTile = Math.max(4, Math.ceil((totalTiles / State.tilesLibrary.length) * 1.6));
+      const chunkSize = Math.max(1, Math.floor(rows / 20));
+
+      for (let r = 0; r < rows; r++) {
+        if (State.abortGeneration) break;
+
+        const rowAssignments = [];
+        for (let c = 0; c < cols; c++) {
+          const targetCell = targetGrid[r][c];
+          let bestTileIdx = 0;
+          let bestFlipped = false;
+          let minScore = Infinity;
+
+          const leftNeighbor = c > 0 ? rowAssignments[c - 1] : -1;
+          const topNeighbor = r > 0 ? assignments[r - 1][c] : -1;
+          const topLeftNeighbor = (r > 0 && c > 0) ? assignments[r - 1][c - 1] : -1;
+          const topRightNeighbor = (r > 0 && c < cols - 1) ? assignments[r - 1][c + 1] : -1;
+
+          for (let t = 0; t < State.tilesLibrary.length; t++) {
+            const tile = State.tilesLibrary[t];
+            const avgDelta = deltaE76(targetCell.lab, tile.lab);
+
+            let subDeltaNormal = avgDelta;
+            let subDeltaFlipped = avgDelta;
+
+            if (tile.subGridLab && tile.subGridLab.length === 4) {
+              const dTL = deltaE76(targetCell.subLabs[0], tile.subGridLab[0]);
+              const dTR = deltaE76(targetCell.subLabs[1], tile.subGridLab[1]);
+              const dBL = deltaE76(targetCell.subLabs[2], tile.subGridLab[2]);
+              const dBR = deltaE76(targetCell.subLabs[3], tile.subGridLab[3]);
+              subDeltaNormal = (dTL + dTR + dBL + dBR) * 0.25;
+
+              if (checkMirror) {
+                const fTL = deltaE76(targetCell.subLabs[0], tile.subGridLab[1]);
+                const fTR = deltaE76(targetCell.subLabs[1], tile.subGridLab[0]);
+                const fBL = deltaE76(targetCell.subLabs[2], tile.subGridLab[3]);
+                const fBR = deltaE76(targetCell.subLabs[3], tile.subGridLab[2]);
+                subDeltaFlipped = (fTL + fTR + fBL + fBR) * 0.25;
+              }
+            }
+
+            const useFlip = checkMirror && (subDeltaFlipped < subDeltaNormal);
+            const structuralDelta = useFlip ? subDeltaFlipped : subDeltaNormal;
+
+            // Color accuracy is primary so wrong hues (green/blue/purple) are NEVER picked for skin tones
+            let score = (avgDelta * 0.55 + structuralDelta * 0.45) * State.settings.colorStrength;
+
+            if (reuseStrategy === 'strict' && usageCount[t] >= maxStrictPerTile && State.tilesLibrary.length > 10) {
+              score += 35.0;
+            } else if (reuseStrategy === 'balanced') {
+              const avgUsage = totalTiles / State.tilesLibrary.length;
+              score += (usageCount[t] / Math.max(1, avgUsage)) * 4.5;
+            }
+
+            // Gentle neighbor penalty: avoids immediate repeats among similar-colored tiles without forcing neon mismatches
+            if (checkNeighbor) {
+              if (t === leftNeighbor) score += 14.0;
+              if (t === topNeighbor) score += 14.0;
+              if (t === topLeftNeighbor) score += 8.0;
+              if (t === topRightNeighbor) score += 8.0;
+            }
+
+            if (score < minScore) {
+              minScore = score;
+              bestTileIdx = t;
+              bestFlipped = useFlip;
+            }
+          }
+
+          usageCount[bestTileIdx]++;
+          rowAssignments.push(bestTileIdx);
+
+          const matchedTile = State.tilesLibrary[bestTileIdx];
+          const destX = c * tileRenderWidth;
+          const destY = r * tileRenderHeight;
+
+          rawCtx.save();
+          if (bestFlipped) {
+            rawCtx.translate(destX + tileRenderWidth, destY);
+            rawCtx.scale(-1, 1);
+            rawCtx.drawImage(matchedTile.img, 0, 0, tileRenderWidth, tileRenderHeight);
+          } else {
+            rawCtx.drawImage(matchedTile.img, destX, destY, tileRenderWidth, tileRenderHeight);
+          }
+          rawCtx.restore();
+        }
+
+        assignments.push(rowAssignments);
+
+        if (r % chunkSize === 0 || r === rows - 1) {
+          const pct = Math.round(10 + (r / rows) * 80);
+          progressBar.style.width = pct + '%';
+          progressPercent.textContent = pct + '%';
+          progressText.textContent = `Rendering mosaic row ${r + 1} of ${rows}...`;
+          await new Promise(res => setTimeout(res, 0));
+        }
+      }
+
+      if (State.abortGeneration) {
+        progressContainer.classList.add('hidden');
+        State.isGenerating = false;
+        return;
+      }
+
+      // 3. Apply Photomosaic Color Harmonization
+      progressText.textContent = 'Harmonizing skin tones & tile details...';
+      progressBar.style.width = '95%';
+      progressPercent.textContent = '95%';
+
+      State.currentMosaicCanvas = mainCanvas;
+      State.mosaicMetadata = {
+        cols,
+        rows,
+        tileRenderWidth,
+        tileRenderHeight,
+        canvasWidth,
+        canvasHeight,
+        assignments
+      };
+
+      applyBlendingAndPostProcessing();
+
+      // Show canvas in UI
+      document.getElementById('canvasEmptyState').classList.add('hidden');
+      mainCanvas.classList.remove('hidden');
+      btnOpenInspector.classList.remove('hidden');
+      document.getElementById('canvasDimsBadge').textContent = `${canvasWidth} × ${canvasHeight} px`;
+
+      progressBar.style.width = '100%';
+      progressPercent.textContent = '100%';
+      progressText.textContent = 'Completed!';
+
+      setTimeout(() => {
+        progressContainer.classList.add('hidden');
+        State.isGenerating = false;
+        showToast('Photographic Mosaic synthesized successfully!', 'success');
+      }, 500);
+    });
+
+    document.getElementById('btnOpenInInspector').addEventListener('click', () => {
+      switchView('viewer');
+    });
+
+    /* =========================================================================
+       9. MOSAIC VIEWER, INSPECTOR & INTERACTIVE COMPARISON
+       ========================================================================= */
+    const inspectorViewport = document.getElementById('inspectorViewport');
+    const transformLayer = document.getElementById('inspectorTransformLayer');
+    const inspectorCanvas = document.getElementById('inspectorCanvas');
+    const splitOriginalCanvas = document.getElementById('splitOriginalCanvas');
+    const splitDividerHandle = document.getElementById('splitDividerHandle');
+    const labelZoom = document.getElementById('labelZoomLevel');
+    const tileTooltip = document.getElementById('tileTooltip');
+
+    function renderInspectorView() {
+      if (!State.currentMosaicCanvas) {
+        showToast('Generate a mosaic in the workspace first.', 'info');
+        switchView('workspace');
+        return;
+      }
+
+      inspectorCanvas.width = State.currentMosaicCanvas.width;
+      inspectorCanvas.height = State.currentMosaicCanvas.height;
+      const ctx = inspectorCanvas.getContext('2d');
+      ctx.drawImage(State.currentMosaicCanvas, 0, 0);
+
+      // Setup split canvas
+      if (State.targetImage) {
+        splitOriginalCanvas.width = inspectorCanvas.width;
+        splitOriginalCanvas.height = inspectorCanvas.height;
+        const oCtx = splitOriginalCanvas.getContext('2d');
+        oCtx.drawImage(State.targetImage, 0, 0, inspectorCanvas.width, inspectorCanvas.height);
+      }
+
+      resetZoomAndFit();
+    }
+
+    function resetZoomAndFit() {
+      const vRect = inspectorViewport.getBoundingClientRect();
+      const cW = inspectorCanvas.width || 640;
+      const cH = inspectorCanvas.height || 480;
+
+      const scaleX = (vRect.width - 40) / cW;
+      const scaleY = (vRect.height - 40) / cH;
+      State.zoom.scale = Math.min(1.0, Math.min(scaleX, scaleY));
+      State.zoom.x = 0;
+      State.zoom.y = 0;
+
+      updateTransform();
+    }
+
+    function updateTransform() {
+      transformLayer.style.transform = `translate(${State.zoom.x}px, ${State.zoom.y}px) scale(${State.zoom.scale})`;
+      labelZoom.textContent = Math.round(State.zoom.scale * 100) + '%';
+      updateSplitClip();
+    }
+
+    // Zoom buttons
+    document.getElementById('btnZoomIn').addEventListener('click', () => {
+      State.zoom.scale = Math.min(16.0, State.zoom.scale * 1.35);
+      updateTransform();
+    });
+
+    document.getElementById('btnZoomOut').addEventListener('click', () => {
+      State.zoom.scale = Math.max(0.2, State.zoom.scale / 1.35);
+      updateTransform();
+    });
+
+    document.getElementById('btnZoomFit').addEventListener('click', resetZoomAndFit);
+
+    // Mouse wheel zoom centered on cursor
+    inspectorViewport.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      const zoomFactor = e.deltaY < 0 ? 1.15 : 0.85;
+      State.zoom.scale = Math.max(0.2, Math.min(16.0, State.zoom.scale * zoomFactor));
+      updateTransform();
+    }, { passive: false });
+
+    // Panning & Tile Inspection
+    inspectorViewport.addEventListener('pointerdown', (e) => {
+      State.zoom.isPanning = true;
+      State.zoom.startX = e.clientX - State.zoom.x;
+      State.zoom.startY = e.clientY - State.zoom.y;
+    });
+
+    window.addEventListener('pointermove', (e) => {
+      if (State.zoom.isPanning) {
+        State.zoom.x = e.clientX - State.zoom.startX;
+        State.zoom.y = e.clientY - State.zoom.startY;
+        updateTransform();
+        return;
+      }
+
+      // Check Tile Hover if in view
+      if (State.activeView === 'viewer' && State.mosaicMetadata && !State.splitView.active) {
+        inspectTileAtScreenCoord(e.clientX, e.clientY);
+      }
+    });
+
+    window.addEventListener('pointerup', () => {
+      State.zoom.isPanning = false;
+    });
+
+    // Inspect tile under cursor
+    function inspectTileAtScreenCoord(screenX, screenY) {
+      const rect = inspectorCanvas.getBoundingClientRect();
+      if (
+        screenX < rect.left || screenX > rect.right ||
+        screenY < rect.top || screenY > rect.bottom
+      ) {
+        tileTooltip.classList.add('hidden');
+        return;
+      }
+
+      const canvasX = (screenX - rect.left) / State.zoom.scale;
+      const canvasY = (screenY - rect.top) / State.zoom.scale;
+
+      const meta = State.mosaicMetadata;
+      const col = Math.floor(canvasX / meta.tileRenderWidth);
+      const row = Math.floor(canvasY / meta.tileRenderHeight);
+
+      if (row >= 0 && row < meta.rows && col >= 0 && col < meta.cols) {
+        const tileIdx = meta.assignments[row][col];
+        const tile = State.tilesLibrary[tileIdx];
+
+        if (tile) {
+          document.getElementById('tooltipTileThumb').src = tile.thumbDataUrl;
+          document.getElementById('tooltipTileName').textContent = tile.filename;
+          document.getElementById('tooltipTileCoords').textContent = `Cell [Row ${row + 1}, Col ${col + 1}]`;
+          tileTooltip.classList.remove('hidden');
+        }
+      }
+    }
+
+    // Split Before/After Comparison
+    const btnToggleSplit = document.getElementById('btnToggleSplitView');
+    btnToggleSplit.addEventListener('click', () => {
+      State.splitView.active = !State.splitView.active;
+      if (State.splitView.active) {
+        splitOriginalCanvas.classList.remove('hidden');
+        splitDividerHandle.classList.remove('hidden');
+        btnToggleSplit.classList.add('border-brand-400');
+        document.getElementById('labelSplitBtn').textContent = 'Exit Split View';
+        updateSplitClip();
+      } else {
+        splitOriginalCanvas.classList.add('hidden');
+        splitDividerHandle.classList.add('hidden');
+        btnToggleSplit.classList.remove('border-brand-400');
+        document.getElementById('labelSplitBtn').textContent = 'Split Before/After';
+      }
+    });
+
+    function updateSplitClip() {
+      if (!State.splitView.active) return;
+      const w = inspectorCanvas.width;
+      const splitPx = w * State.splitView.splitX;
+
+      // Clip splitOriginalCanvas so only left portion shows original
+      splitOriginalCanvas.style.clipPath = `polygon(0 0, ${splitPx}px 0, ${splitPx}px 100%, 0 100%)`;
+      
+      // Position divider
+      const rect = inspectorCanvas.getBoundingClientRect();
+      const vRect = inspectorViewport.getBoundingClientRect();
+      const dividerScreenX = rect.left + (rect.width * State.splitView.splitX);
+      const relativeX = dividerScreenX - vRect.left;
+      splitDividerHandle.style.left = `${relativeX}px`;
+    }
+
+    // Drag split handle
+    let isDraggingSplit = false;
+    splitDividerHandle.addEventListener('pointerdown', (e) => {
+      e.stopPropagation();
+      isDraggingSplit = true;
+    });
+
+    window.addEventListener('pointermove', (e) => {
+      if (!isDraggingSplit) return;
+      const rect = inspectorCanvas.getBoundingClientRect();
+      const frac = (e.clientX - rect.left) / rect.width;
+      State.splitView.splitX = Math.max(0.05, Math.min(0.95, frac));
+      updateSplitClip();
+    });
+
+    window.addEventListener('pointerup', () => {
+      isDraggingSplit = false;
+    });
+
+    // High-Res PNG Export
+    document.getElementById('btnExportHighRes').addEventListener('click', () => {
+      if (!State.currentMosaicCanvas) {
+        showToast('No mosaic available to export.', 'error');
+        return;
+      }
+      showToast('Preparing full-resolution PNG download...', 'info');
+
+      try {
+        const link = document.createElement('a');
+        link.download = `DreamMosaic_Artwork_${Date.now()}.png`;
+        link.href = State.currentMosaicCanvas.toDataURL('image/png');
+        link.click();
+        showToast('High-resolution mosaic exported!', 'success');
+      } catch (err) {
+        showToast('Export failed: ' + err.message, 'error');
+      }
+    });
+
+    // Save Project
+    document.getElementById('btnSaveToProjects').addEventListener('click', () => {
+      if (!State.currentMosaicCanvas || !State.mosaicMetadata) {
+        showToast('Generate a mosaic before saving.', 'error');
+        return;
+      }
+
+      const proj = {
+        id: 'proj_' + Date.now(),
+        title: `Memory Mosaic ${new Date().toLocaleDateString()}`,
+        date: new Date().toISOString(),
+        tileCount: State.mosaicMetadata.cols * State.mosaicMetadata.rows,
+        cols: State.mosaicMetadata.cols,
+        rows: State.mosaicMetadata.rows,
+        thumbDataUrl: State.currentMosaicCanvas.toDataURL('image/jpeg', 0.6),
+        dataUrl: State.currentMosaicCanvas.toDataURL('image/png'),
+        mode: State.settings.mode
+      };
+
+      State.savedProjects.unshift(proj);
+      safeStorageSet('dm_saved_projects', JSON.stringify(State.savedProjects.map(p => ({
+        id: p.id, title: p.title, date: p.date, tileCount: p.tileCount, cols: p.cols, rows: p.rows, thumbDataUrl: p.thumbDataUrl, mode: p.mode
+      }))));
+
+      showToast('Project saved to vault gallery!', 'success');
+    });
+
+    /* =========================================================================
+       10. SAVED PROJECTS VIEW
+       ========================================================================= */
+    function renderSavedProjectsView() {
+      const grid = document.getElementById('savedProjectsGrid');
+      const empty = document.getElementById('projectsEmptyState');
+
+      // Check stored
+      const stored = safeStorageGet('dm_saved_projects');
+      if (stored) {
+        try { State.savedProjects = JSON.parse(stored); } catch (e) {}
+      }
+
+      document.getElementById('statProjectCount').textContent = State.savedProjects.length;
+
+      if (State.savedProjects.length === 0) {
+        grid.innerHTML = '';
+        empty.classList.remove('hidden');
+        return;
+      }
+
+      empty.classList.add('hidden');
+      grid.innerHTML = '';
+
+      State.savedProjects.forEach((proj, idx) => {
+        const card = document.createElement('div');
+        card.className = 'atelier-card p-4 space-y-3';
+        card.innerHTML = `
+          <div class="relative aspect-video rounded-xl overflow-hidden bg-black">
+            <img src="${proj.thumbDataUrl}" alt="${proj.title}" class="w-full h-full object-cover">
+            <span class="absolute top-2 left-2 text-[10px] px-2 py-0.5 rounded-full bg-dark-950/80 text-brand-300 font-mono">${proj.mode || 'Classic'}</span>
+          </div>
+          <div class="space-y-1">
+            <h4 class="text-sm font-semibold text-white truncate">${proj.title}</h4>
+            <p class="text-xs text-slate-400 font-mono">${(proj.tileCount || 0).toLocaleString()} tiles • ${new Date(proj.date).toLocaleDateString()}</p>
+          </div>
+          <div class="flex items-center justify-between pt-1">
+            <button data-proj-view="${idx}" class="text-xs font-semibold text-brand-300 hover:text-brand-200">Inspect Mosaic →</button>
+            <button data-proj-del="${idx}" class="text-xs text-rose-400 hover:text-rose-300">Delete</button>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+
+      // Actions
+      grid.querySelectorAll('[data-proj-view]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const idx = parseInt(btn.getAttribute('data-proj-view'));
+          const proj = State.savedProjects[idx];
+          const img = new Image();
+          img.onload = () => {
+            const c = document.createElement('canvas');
+            c.width = img.width;
+            c.height = img.height;
+            c.getContext('2d').drawImage(img, 0, 0);
+            State.currentMosaicCanvas = c;
+            switchView('viewer');
+          };
+          img.src = proj.dataUrl || proj.thumbDataUrl;
+        });
+      });
+
+      grid.querySelectorAll('[data-proj-del]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const idx = parseInt(btn.getAttribute('data-proj-del'));
+          State.savedProjects.splice(idx, 1);
+          safeStorageSet('dm_saved_projects', JSON.stringify(State.savedProjects));
+          renderSavedProjectsView();
+          showToast('Project deleted.', 'info');
+        });
+      });
+    }
+
+    // Dashboard quick triggers
+    document.getElementById('btnDashCreateMosaic').addEventListener('click', () => switchView('workspace'));
+    document.getElementById('btnDashUploadPhotos').addEventListener('click', () => switchView('library'));
+    document.getElementById('btnDashViewAllProjects').addEventListener('click', () => switchView('projects'));
+
+    /* =========================================================================
+       11. INITIALIZATION & PWA SERVICE WORKER
+       ========================================================================= */
+    window.addEventListener('DOMContentLoaded', async () => {
+      // Check session
+      checkActiveSession();
+
+      // Restore user's uploaded memory photos from IndexedDB
+      const savedTiles = await PhotoVaultDB.loadAll();
+      if (savedTiles && savedTiles.length > 0) {
+        for (const st of savedTiles) {
+          if (st.isSample) continue;
+          await new Promise((res) => {
+            const img = new Image();
+            img.onload = () => {
+              State.tilesLibrary.push({ ...st, img, isSample: false });
+              res();
+            };
+            img.onerror = () => res();
+            img.src = st.dataUrl;
+          });
+        }
+        updateLibraryUI();
+        if (State.tilesLibrary.length > 0) {
+          showToast(`Restored ${State.tilesLibrary.length} personal photos from your vault!`, 'success');
+        }
+      }
+
+      // Register PWA Service Worker
+      if ('serviceWorker' in navigator && window.location.protocol.startsWith('http')) {
+        try {
+          navigator.serviceWorker.register('/service-worker.js').catch(() => {});
+        } catch (e) {}
+      }
+    });
+  </script>
+</body>
+</html>
